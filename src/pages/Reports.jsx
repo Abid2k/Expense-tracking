@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useData } from '../context/DataContext';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { CATEGORIES, CATEGORY_COLORS } from '../constants';
 import { formatSAR, toMonthKey, monthLabel, currentMonthKey, previousMonthKey } from '../utils/format';
 
 export default function Reports() {
   const { expenses, configured } = useData();
+  const isMobile = useIsMobile();
 
   const months = useMemo(() => {
     const set = new Set(expenses.map((e) => toMonthKey(e.Date)));
@@ -69,11 +71,11 @@ export default function Reports() {
         {monthlyTotals.every((m) => m.total === 0) ? (
           <p className="muted">No expense data yet.</p>
         ) : (
-          <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={monthlyTotals}>
+          <ResponsiveContainer width="100%" height={isMobile ? 260 : 320}>
+            <BarChart data={monthlyTotals} margin={{ left: -20, right: 8 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="label" />
-              <YAxis />
+              <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={isMobile ? 'preserveStartEnd' : 0} />
+              <YAxis tick={{ fontSize: 11 }} width={44} />
               <Tooltip formatter={(value) => formatSAR(value)} />
               <Bar dataKey="total" fill="#3b82f6" name="Total Spent" />
             </BarChart>
@@ -124,13 +126,13 @@ export default function Reports() {
           <p className="muted">No category data to compare for these months.</p>
         ) : (
           <>
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={categoryComparison}>
+            <ResponsiveContainer width="100%" height={isMobile ? 260 : 320}>
+              <BarChart data={categoryComparison} margin={{ left: -20, right: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={isMobile ? 'preserveStartEnd' : 0} />
+                <YAxis tick={{ fontSize: 11 }} width={44} />
                 <Tooltip formatter={(value) => formatSAR(value)} />
-                <Legend />
+                <Legend wrapperStyle={{ fontSize: 13 }} />
                 <Bar dataKey={monthLabel(monthA)} fill="#94a3b8" />
                 <Bar dataKey={monthLabel(monthB)} fill="#3b82f6" />
               </BarChart>
@@ -152,13 +154,15 @@ export default function Reports() {
                   const d = b - a;
                   return (
                     <tr key={row.name}>
-                      <td>
-                        <span className="dot" style={{ background: CATEGORY_COLORS[row.name] }} />
-                        {row.name}
+                      <td data-label="Category">
+                        <span>
+                          <span className="dot" style={{ background: CATEGORY_COLORS[row.name] }} />
+                          {row.name}
+                        </span>
                       </td>
-                      <td>{formatSAR(a)}</td>
-                      <td>{formatSAR(b)}</td>
-                      <td className={d > 0 ? 'error-text' : d < 0 ? 'success-text' : ''}>
+                      <td data-label={monthLabel(monthA)}>{formatSAR(a)}</td>
+                      <td data-label={monthLabel(monthB)}>{formatSAR(b)}</td>
+                      <td data-label="Difference" className={d > 0 ? 'error-text' : d < 0 ? 'success-text' : ''}>
                         {d > 0 ? '+' : ''}{formatSAR(d)}
                       </td>
                     </tr>

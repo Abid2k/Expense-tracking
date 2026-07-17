@@ -5,6 +5,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
 } from 'recharts';
 import { useData } from '../context/DataContext';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { CATEGORY_COLORS } from '../constants';
 import { formatSAR, toMonthKey, toDateStr, monthLabel, currentMonthKey, daysInMonth } from '../utils/format';
 
@@ -15,6 +16,7 @@ function isDebtPaid(debt) {
 export default function Dashboard() {
   const { expenses, savings, goals, debts, debtPayments, todos, loading, configured, error } = useData();
   const [monthKey, setMonthKey] = useState(currentMonthKey());
+  const isMobile = useIsMobile();
 
   const months = useMemo(() => {
     const set = new Set(expenses.map((e) => toMonthKey(e.Date)));
@@ -169,11 +171,11 @@ export default function Dashboard() {
         {total === 0 ? (
           <p className="muted">No expenses recorded for {monthLabel(monthKey)}.</p>
         ) : (
-          <ResponsiveContainer width="100%" height={260}>
-            <AreaChart data={dailyTrend}>
+          <ResponsiveContainer width="100%" height={isMobile ? 220 : 260}>
+            <AreaChart data={dailyTrend} margin={{ left: -20, right: 8 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
-              <YAxis />
+              <XAxis dataKey="day" tick={{ fontSize: 11 }} interval={isMobile ? 4 : 1} />
+              <YAxis tick={{ fontSize: 11 }} width={44} />
               <Tooltip formatter={(value) => formatSAR(value)} labelFormatter={(day) => `Day ${day}`} />
               <Area type="monotone" dataKey="total" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.25} name="Spent" />
             </AreaChart>
@@ -186,7 +188,7 @@ export default function Dashboard() {
         {byCategory.length === 0 ? (
           <p className="muted">No expenses recorded for {monthLabel(monthKey)}.</p>
         ) : (
-          <ResponsiveContainer width="100%" height={360}>
+          <ResponsiveContainer width="100%" height={isMobile ? 300 : 360}>
             <PieChart>
               <Pie
                 data={byCategory}
@@ -194,15 +196,15 @@ export default function Dashboard() {
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                outerRadius={130}
-                label={(entry) => `${entry.name} (${((entry.value / total) * 100).toFixed(0)}%)`}
+                outerRadius={isMobile ? 85 : 130}
+                label={isMobile ? false : (entry) => `${entry.name} (${((entry.value / total) * 100).toFixed(0)}%)`}
               >
                 {byCategory.map((entry) => (
                   <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name] || '#999'} />
                 ))}
               </Pie>
               <Tooltip formatter={(value) => formatSAR(value)} />
-              <Legend />
+              <Legend wrapperStyle={{ fontSize: 13 }} />
             </PieChart>
           </ResponsiveContainer>
         )}

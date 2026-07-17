@@ -142,11 +142,11 @@ export default function Expenses() {
             <tbody>
               {monthExpenses.map((e) => (
                 <tr key={e.ID}>
-                  <td>{toDateStr(e.Date)}</td>
-                  <td>{e.Category}</td>
-                  <td>{e.Note}</td>
-                  <td>{formatSAR(e.Amount)}</td>
-                  <td>
+                  <td data-label="Date">{toDateStr(e.Date)}</td>
+                  <td data-label="Category">{e.Category}</td>
+                  <td data-label="Note">{e.Note}</td>
+                  <td data-label="Amount">{formatSAR(e.Amount)}</td>
+                  <td data-label="">
                     <button className="danger small" onClick={() => handleDelete(e.ID)}>Delete</button>
                   </td>
                 </tr>

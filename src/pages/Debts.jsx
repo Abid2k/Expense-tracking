@@ -183,9 +183,9 @@ function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete, onTogglePai
           <tbody>
             {[...payments].sort((a, b) => (a.Date < b.Date ? 1 : -1)).map((p) => (
               <tr key={p.ID}>
-                <td>{toDateStr(p.Date)}</td>
-                <td>{p.Note}</td>
-                <td>{formatSAR(p.Amount)}</td>
+                <td data-label="Date">{toDateStr(p.Date)}</td>
+                <td data-label="Note">{p.Note}</td>
+                <td data-label="Amount">{formatSAR(p.Amount)}</td>
               </tr>
             ))}
           </tbody>

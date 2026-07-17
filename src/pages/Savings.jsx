@@ -181,9 +181,9 @@ function GoalCard({ goal, contributions, isOwner, onAddContribution, onDelete, o
           <tbody>
             {[...contributions].sort((a, b) => (a.Date < b.Date ? 1 : -1)).map((c) => (
               <tr key={c.ID}>
-                <td>{toDateStr(c.Date)}</td>
-                <td>{c.Note}</td>
-                <td>{formatSAR(c.Amount)}</td>
+                <td data-label="Date">{toDateStr(c.Date)}</td>
+                <td data-label="Note">{c.Note}</td>
+                <td data-label="Amount">{formatSAR(c.Amount)}</td>
               </tr>
             ))}
           </tbody>

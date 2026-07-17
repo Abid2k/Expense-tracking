@@ -1,15 +1,32 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { api, getScriptUrl } from '../api';
+import { api, getScriptUrl, getRole, setSession, clearSession } from '../api';
 
 const DataContext = createContext(null);
 
 export function DataProvider({ children }) {
   const [expenses, setExpenses] = useState([]);
   const [savings, setSavings] = useState([]);
+  const [debts, setDebts] = useState([]);
+  const [debtPayments, setDebtPayments] = useState([]);
+  const [todos, setTodos] = useState([]);
+  const [notes, setNotes] = useState([]);
   const [settings, setSettings] = useState({ GoalName: 'My Savings Goal', GoalAmount: 0 });
+  const [role, setRole] = useState(getRole());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [configured, setConfigured] = useState(Boolean(getScriptUrl()));
+  const [locked, setLocked] = useState(false);
+
+  const applyData = (data) => {
+    setExpenses(data.expenses || []);
+    setSavings(data.savings || []);
+    setDebts(data.debts || []);
+    setDebtPayments(data.debtPayments || []);
+    setTodos(data.todos || []);
+    setNotes(data.notes || []);
+    setSettings(data.settings || {});
+    setRole(data.role || '');
+  };
 
   const refresh = useCallback(async () => {
     if (!getScriptUrl()) {
@@ -22,11 +39,15 @@ export function DataProvider({ children }) {
     setError('');
     try {
       const data = await api.getAll();
-      setExpenses(data.expenses || []);
-      setSavings(data.savings || []);
-      setSettings(data.settings || {});
+      applyData(data);
+      setLocked(false);
     } catch (err) {
-      setError(err.message);
+      if (err instanceof api.AuthError) {
+        clearSession();
+        setLocked(true);
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -36,44 +57,65 @@ export function DataProvider({ children }) {
     refresh();
   }, [refresh]);
 
-  const addExpense = useCallback(async (expense) => {
-    await api.addExpense(expense);
-    await refresh();
-  }, [refresh]);
+  const unlock = useCallback(async (pin) => {
+    const data = await api.verifyPin(pin);
+    setSession(pin, data.role);
+    applyData(data);
+    setLocked(false);
+    setConfigured(true);
+    return data.role;
+  }, []);
 
-  const deleteExpense = useCallback(async (id) => {
-    await api.deleteExpense(id);
-    await refresh();
-  }, [refresh]);
+  const lock = useCallback(() => {
+    clearSession();
+    setLocked(true);
+  }, []);
 
-  const addSaving = useCallback(async (saving) => {
-    await api.addSaving(saving);
-    await refresh();
-  }, [refresh]);
-
-  const deleteSaving = useCallback(async (id) => {
-    await api.deleteSaving(id);
-    await refresh();
-  }, [refresh]);
-
-  const setGoal = useCallback(async (goal) => {
-    await api.setGoal(goal);
-    await refresh();
-  }, [refresh]);
+  function wrap(fn) {
+    return async (...args) => {
+      await fn(...args);
+      await refresh();
+    };
+  }
 
   const value = {
     expenses,
     savings,
+    debts,
+    debtPayments,
+    todos,
+    notes,
     settings,
+    role,
+    isOwner: role === 'owner',
     loading,
     error,
     configured,
+    locked,
     refresh,
-    addExpense,
-    deleteExpense,
-    addSaving,
-    deleteSaving,
-    setGoal,
+    unlock,
+    lock,
+
+    addExpense: wrap(api.addExpense),
+    deleteExpense: wrap(api.deleteExpense),
+
+    addSaving: wrap(api.addSaving),
+    deleteSaving: wrap(api.deleteSaving),
+
+    setGoal: wrap(api.setGoal),
+    setPins: wrap(api.setPins),
+
+    addDebt: wrap(api.addDebt),
+    deleteDebt: wrap(api.deleteDebt),
+    addDebtPayment: wrap(api.addDebtPayment),
+    deleteDebtPayment: wrap(api.deleteDebtPayment),
+
+    addTodo: wrap(api.addTodo),
+    updateTodo: wrap(api.updateTodo),
+    deleteTodo: wrap(api.deleteTodo),
+
+    addNote: wrap(api.addNote),
+    deleteNote: wrap(api.deleteNote),
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

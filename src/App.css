@@ -116,7 +116,7 @@ label {
   color: var(--text);
 }
 
-input, select {
+input, select, textarea {
   width: 100%;
   padding: 9px 10px;
   border-radius: 8px;
@@ -124,6 +124,10 @@ input, select {
   background: var(--bg);
   color: var(--text-h);
   font: inherit;
+}
+
+textarea {
+  resize: vertical;
 }
 
 .form-grid {
@@ -222,4 +226,62 @@ ol {
   padding-left: 20px;
   font-size: 14px;
   line-height: 1.8;
+}
+
+.lock-screen {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.lock-card {
+  width: 100%;
+  max-width: 320px;
+  align-items: stretch;
+  text-align: center;
+}
+
+.lock-card h1 {
+  font-size: 22px;
+}
+
+.role-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--accent);
+}
+
+.checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.checklist-item:last-child {
+  border-bottom: none;
+}
+
+.checklist-item.done span.item-text {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+.item-text {
+  flex: 1;
 }

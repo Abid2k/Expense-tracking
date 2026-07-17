@@ -6,7 +6,7 @@ import { CATEGORY_COLORS } from '../constants';
 import { formatSAR, toMonthKey, monthLabel, currentMonthKey } from '../utils/format';
 
 export default function Dashboard() {
-  const { expenses, savings, settings, loading, configured, error } = useData();
+  const { expenses, savings, debts, debtPayments, settings, loading, configured, error } = useData();
   const [monthKey, setMonthKey] = useState(currentMonthKey());
 
   const months = useMemo(() => {
@@ -37,6 +37,17 @@ export default function Dashboard() {
   const savingsTotal = savings.reduce((sum, s) => sum + Number(s.Amount), 0);
   const goalAmount = Number(settings.GoalAmount) || 0;
   const goalPct = goalAmount > 0 ? Math.min(100, (savingsTotal / goalAmount) * 100) : 0;
+
+  const debtOutstanding = useMemo(() => {
+    return debts
+      .filter((d) => d.Type === 'I Owe')
+      .reduce((sum, d) => {
+        const paid = debtPayments
+          .filter((p) => p.DebtID === d.ID)
+          .reduce((s, p) => s + Number(p.Amount), 0);
+        return sum + Math.max(0, Number(d.Amount) - paid);
+      }, 0);
+  }, [debts, debtPayments]);
 
   if (!configured) {
     return (
@@ -80,6 +91,10 @@ export default function Dashboard() {
           <div className="progress-bar">
             <div className="progress-fill" style={{ width: `${goalPct}%` }} />
           </div>
+        </div>
+        <div className="card summary-card">
+          <span className="summary-label">Debt Outstanding</span>
+          <span className="summary-value error-text">{formatSAR(debtOutstanding)}</span>
         </div>
       </div>
 

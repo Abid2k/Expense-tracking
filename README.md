@@ -75,6 +75,18 @@ the script itself, not just hidden buttons in the UI.
 
 Use the **Lock** button in the navbar any time to end your session on a shared/public computer.
 
+### 4. Add it to your phone's home screen (recommended)
+
+The site works in any mobile browser as-is, but adding it to your home screen gives you a
+one-tap app icon with no browser address bar, so logging an expense is as fast as opening any
+other app:
+
+- **iPhone (Safari):** open the live site → tap the Share icon → **Add to Home Screen**.
+- **Android (Chrome):** open the live site → tap the ⋮ menu → **Add to Home screen** / **Install app**.
+
+You only need to do this once. After that, the connection URL and PIN you set up stay saved on
+that phone, so opening the icon takes you straight to your dashboard.
+
 ### Updating the script later
 
 If you ever change `apps-script/Code.gs` in this repo, copy the updated code into the Apps Script editor for your sheet, then **Deploy → Manage deployments → edit (pencil icon) → New version → Deploy**. The Web App URL stays the same.

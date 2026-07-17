@@ -3,16 +3,27 @@ import { useData } from '../context/DataContext';
 import { DEBT_TYPES } from '../constants';
 import { formatSAR, toDateStr, todayStr } from '../utils/format';
 
-function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete }) {
+function isDebtPaid(debt) {
+  return debt.Paid === true || debt.Paid === 'TRUE';
+}
+
+function debtRemaining(debt, payments) {
+  if (isDebtPaid(debt)) return 0;
+  const paid = payments.reduce((sum, p) => sum + Number(p.Amount), 0);
+  return Math.max(0, Number(debt.Amount) - paid);
+}
+
+function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete, onTogglePaid }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ date: todayStr(), amount: '', note: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const paid = payments.reduce((sum, p) => sum + Number(p.Amount), 0);
+  const paidFlag = isDebtPaid(debt);
   const amount = Number(debt.Amount);
-  const remaining = Math.max(0, amount - paid);
-  const pct = amount > 0 ? Math.min(100, (paid / amount) * 100) : 0;
+  const paidAmount = paidFlag ? amount : payments.reduce((sum, p) => sum + Number(p.Amount), 0);
+  const remaining = Math.max(0, amount - paidAmount);
+  const pct = paidFlag ? 100 : amount > 0 ? Math.min(100, (paidAmount / amount) * 100) : 0;
   const isOwed = debt.Type === 'Owed to Me';
 
   async function handleSubmit(e) {
@@ -36,10 +47,11 @@ function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete }) {
   }
 
   return (
-    <div className="card">
+    <div className={paidFlag ? 'card debt-paid' : 'card'}>
       <div className="page-header">
         <h2 style={{ margin: 0 }}>
           {debt.Name} <span className={isOwed ? 'success-text' : 'error-text'} style={{ fontSize: 13, fontWeight: 600 }}>({debt.Type})</span>
+          {paidFlag && <span className="role-badge" style={{ marginLeft: 8 }}>Paid</span>}
         </h2>
         {isOwner && (
           <button className="danger small" onClick={() => onDelete(debt.ID)}>Delete</button>
@@ -49,12 +61,23 @@ function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete }) {
         <div className="progress-fill" style={{ width: `${pct}%` }} />
       </div>
       <p className="muted">
-        {formatSAR(paid)} of {formatSAR(amount)} {isOwed ? 'received' : 'paid'} ({pct.toFixed(0)}%)
+        {formatSAR(paidAmount)} of {formatSAR(amount)} {isOwed ? 'received' : 'paid'} ({pct.toFixed(0)}%)
         {' — '}{formatSAR(remaining)} remaining
       </p>
       {debt.Note && <p className="muted">{debt.Note}</p>}
 
       {isOwner && (
+        <label className="checklist-item" style={{ borderBottom: 'none', padding: 0 }}>
+          <input
+            type="checkbox"
+            checked={paidFlag}
+            onChange={(e) => onTogglePaid(debt.ID, e.target.checked)}
+          />
+          <span className="item-text">Mark as Paid</span>
+        </label>
+      )}
+
+      {isOwner && !paidFlag && (
         <div>
           {!showForm ? (
             <button onClick={() => setShowForm(true)}>+ Add Payment</button>
@@ -103,7 +126,7 @@ function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete }) {
 }
 
 export default function Debts() {
-  const { debts, debtPayments, addDebt, deleteDebt, addDebtPayment, isOwner, loading, configured } = useData();
+  const { debts, debtPayments, addDebt, deleteDebt, addDebtPayment, toggleDebtPaid, isOwner, loading, configured } = useData();
   const [form, setForm] = useState({ name: '', type: DEBT_TYPES[0], amount: '', note: '', date: todayStr() });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
@@ -119,17 +142,11 @@ export default function Debts() {
 
   const totalOwed = debts
     .filter((d) => d.Type === 'I Owe')
-    .reduce((sum, d) => {
-      const paid = (paymentsByDebt[d.ID] || []).reduce((s, p) => s + Number(p.Amount), 0);
-      return sum + Math.max(0, Number(d.Amount) - paid);
-    }, 0);
+    .reduce((sum, d) => sum + debtRemaining(d, paymentsByDebt[d.ID] || []), 0);
 
   const totalOwedToMe = debts
     .filter((d) => d.Type === 'Owed to Me')
-    .reduce((sum, d) => {
-      const paid = (paymentsByDebt[d.ID] || []).reduce((s, p) => s + Number(p.Amount), 0);
-      return sum + Math.max(0, Number(d.Amount) - paid);
-    }, 0);
+    .reduce((sum, d) => sum + debtRemaining(d, paymentsByDebt[d.ID] || []), 0);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -219,6 +236,7 @@ export default function Debts() {
             isOwner={isOwner}
             onAddPayment={(debtId, payment) => addDebtPayment({ debtId, ...payment })}
             onDelete={deleteDebt}
+            onTogglePaid={toggleDebtPaid}
           />
         ))
       )}

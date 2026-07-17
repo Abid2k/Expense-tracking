@@ -78,6 +78,13 @@
   gap: 16px;
 }
 
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
 .summary-card {
   gap: 6px;
 }
@@ -284,4 +291,9 @@ ol {
 
 .item-text {
   flex: 1;
+}
+
+.debt-paid {
+  opacity: 0.7;
+  border-color: var(--success);
 }

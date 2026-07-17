@@ -9,10 +9,15 @@
  * owner (so first-time setup works). Once OwnerPin is set, a request must
  * match OwnerPin (full read/write) or ViewerPin (read-only) to be allowed.
  * Pin values themselves are never included in any JSON response.
+ *
+ * Rows are written/read by header name (not fixed column position), so
+ * sheets created by older versions of this script can safely gain new
+ * columns without breaking existing data.
  */
 
 var EXPENSES_SHEET = 'Expenses';
 var SAVINGS_SHEET = 'Savings';
+var GOALS_SHEET = 'Goals';
 var SETTINGS_SHEET = 'Settings';
 var DEBTS_SHEET = 'Debts';
 var DEBT_PAYMENTS_SHEET = 'DebtPayments';
@@ -34,10 +39,64 @@ function getOrCreateSheet_(name, headers) {
   return sheet;
 }
 
+// Adds any headers in requiredHeaders that the sheet doesn't already have,
+// backfilling existing rows with a default value. Safe to call every time.
+function ensureColumns_(sheet, requiredHeaders, defaults) {
+  requiredHeaders.forEach(function (header) {
+    var lastCol = sheet.getLastColumn();
+    var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+    if (headers.indexOf(header) !== -1) return;
+
+    var newCol = lastCol + 1;
+    sheet.getRange(1, newCol).setValue(header);
+    var lastRow = sheet.getLastRow();
+    if (lastRow > 1) {
+      var def = defaults && header in defaults ? defaults[header] : '';
+      var vals = [];
+      for (var i = 0; i < lastRow - 1; i++) vals.push([def]);
+      sheet.getRange(2, newCol, lastRow - 1, 1).setValues(vals);
+    }
+  });
+}
+
+function getHeaders_(sheet) {
+  return sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+}
+
+function appendRowByHeaders_(sheet, valuesObj) {
+  var headers = getHeaders_(sheet);
+  var row = headers.map(function (h) {
+    return Object.prototype.hasOwnProperty.call(valuesObj, h) ? valuesObj[h] : '';
+  });
+  sheet.appendRow(row);
+}
+
+function findRowIndexById_(sheet, id) {
+  var values = sheet.getDataRange().getValues();
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][0] === id) return i + 1; // 1-based row number
+  }
+  return -1;
+}
+
+function setCellByHeader_(sheet, rowIndex, headerName, value) {
+  var headers = getHeaders_(sheet);
+  var col = headers.indexOf(headerName) + 1;
+  if (col === 0) throw new Error('Header not found: ' + headerName);
+  sheet.getRange(rowIndex, col).setValue(value);
+}
+
 function ensureSheets_() {
   getOrCreateSheet_(EXPENSES_SHEET, ['ID', 'Date', 'Category', 'Amount', 'Note']);
-  getOrCreateSheet_(SAVINGS_SHEET, ['ID', 'Date', 'Amount', 'Note']);
-  getOrCreateSheet_(DEBTS_SHEET, ['ID', 'Name', 'Type', 'Amount', 'Note', 'Date']);
+
+  var savingsSheet = getOrCreateSheet_(SAVINGS_SHEET, ['ID', 'GoalID', 'Date', 'Amount', 'Note']);
+  ensureColumns_(savingsSheet, ['GoalID'], {});
+
+  var goalsSheet = getOrCreateSheet_(GOALS_SHEET, ['ID', 'Name', 'Type', 'TargetAmount', 'TargetDate', 'Note', 'Date']);
+
+  var debtsSheet = getOrCreateSheet_(DEBTS_SHEET, ['ID', 'Name', 'Type', 'Amount', 'Note', 'Date', 'Paid']);
+  ensureColumns_(debtsSheet, ['Paid'], { Paid: false });
+
   getOrCreateSheet_(DEBT_PAYMENTS_SHEET, ['ID', 'DebtID', 'Date', 'Amount', 'Note']);
   getOrCreateSheet_(TODOS_SHEET, ['ID', 'Month', 'Text', 'Done', 'Date']);
   getOrCreateSheet_(NOTES_SHEET, ['ID', 'Date', 'Title', 'Content']);
@@ -46,10 +105,45 @@ function ensureSheets_() {
   var data = settings.getDataRange().getValues();
   var existing = {};
   for (var i = 1; i < data.length; i++) existing[data[i][0]] = true;
-  if (!existing['GoalName']) settings.appendRow(['GoalName', 'My Savings Goal']);
-  if (!existing['GoalAmount']) settings.appendRow(['GoalAmount', 0]);
   if (!existing['OwnerPin']) settings.appendRow(['OwnerPin', '']);
   if (!existing['ViewerPin']) settings.appendRow(['ViewerPin', '']);
+
+  migrateLegacyGoal_(goalsSheet, savingsSheet, settings);
+}
+
+// Users who set up this app before multi-goal support had a single goal
+// stored as GoalName/GoalAmount in Settings. Move that into a real Goal row
+// once, and attach any existing contributions (which had no GoalID) to it.
+function migrateLegacyGoal_(goalsSheet, savingsSheet, settingsSheet) {
+  var goalsData = goalsSheet.getDataRange().getValues();
+  if (goalsData.length > 1) return; // goals already exist, nothing to migrate
+
+  var values = settingsSheet.getDataRange().getValues();
+  var goalName, goalAmount;
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][0] === 'GoalName') goalName = values[i][1];
+    if (values[i][0] === 'GoalAmount') goalAmount = values[i][1];
+  }
+  if (!goalName && !goalAmount) return; // nothing to migrate
+
+  var newId = Utilities.getUuid();
+  appendRowByHeaders_(goalsSheet, {
+    ID: newId,
+    Name: goalName || 'My Savings Goal',
+    Type: 'Custom',
+    TargetAmount: Number(goalAmount) || 0,
+    TargetDate: '',
+    Note: '',
+    Date: new Date(),
+  });
+
+  var goalIdCol = getHeaders_(savingsSheet).indexOf('GoalID') + 1;
+  var sValues = savingsSheet.getDataRange().getValues();
+  for (var r = 1; r < sValues.length; r++) {
+    if (!sValues[r][goalIdCol - 1]) {
+      savingsSheet.getRange(r + 1, goalIdCol).setValue(newId);
+    }
+  }
 }
 
 function sheetToObjects_(sheet) {
@@ -133,6 +227,7 @@ function doGet(e) {
     role: role,
     expenses: sheetToObjects_(getOrCreateSheet_(EXPENSES_SHEET, [])),
     savings: sheetToObjects_(getOrCreateSheet_(SAVINGS_SHEET, [])),
+    goals: sheetToObjects_(getOrCreateSheet_(GOALS_SHEET, [])),
     debts: sheetToObjects_(getOrCreateSheet_(DEBTS_SHEET, [])),
     debtPayments: sheetToObjects_(getOrCreateSheet_(DEBT_PAYMENTS_SHEET, [])),
     todos: sheetToObjects_(getOrCreateSheet_(TODOS_SHEET, [])),
@@ -165,19 +260,27 @@ function doPost(e) {
   try {
     if (action === 'addExpense') return addExpense_(body);
     if (action === 'deleteExpense') return deleteRowById_(EXPENSES_SHEET, body.id);
+
+    if (action === 'addGoal') return addGoal_(body);
+    if (action === 'deleteGoal') return deleteGoal_(body);
     if (action === 'addSaving') return addSaving_(body);
     if (action === 'deleteSaving') return deleteRowById_(SAVINGS_SHEET, body.id);
-    if (action === 'setGoal') return setGoal_(body);
+
     if (action === 'setPins') return setPins_(body);
+
     if (action === 'addDebt') return addDebt_(body);
     if (action === 'deleteDebt') return deleteDebt_(body);
+    if (action === 'toggleDebtPaid') return toggleDebtPaid_(body);
     if (action === 'addDebtPayment') return addDebtPayment_(body);
     if (action === 'deleteDebtPayment') return deleteRowById_(DEBT_PAYMENTS_SHEET, body.id);
+
     if (action === 'addTodo') return addTodo_(body);
     if (action === 'updateTodo') return updateTodo_(body);
     if (action === 'deleteTodo') return deleteRowById_(TODOS_SHEET, body.id);
+
     if (action === 'addNote') return addNote_(body);
     if (action === 'deleteNote') return deleteRowById_(NOTES_SHEET, body.id);
+
     return jsonOutput_({ ok: false, error: 'Unknown action: ' + action });
   } catch (err) {
     return jsonOutput_({ ok: false, error: String(err) });
@@ -189,23 +292,55 @@ function doPost(e) {
 function addExpense_(body) {
   var sheet = getOrCreateSheet_(EXPENSES_SHEET, ['ID', 'Date', 'Category', 'Amount', 'Note']);
   var id = Utilities.getUuid();
-  sheet.appendRow([id, body.date, body.category, Number(body.amount), body.note || '']);
+  appendRowByHeaders_(sheet, {
+    ID: id,
+    Date: body.date,
+    Category: body.category,
+    Amount: Number(body.amount),
+    Note: body.note || '',
+  });
   return jsonOutput_({ ok: true, id: id });
 }
 
-// ---- Savings ----
+// ---- Savings goals ----
+
+function addGoal_(body) {
+  var sheet = getOrCreateSheet_(GOALS_SHEET, ['ID', 'Name', 'Type', 'TargetAmount', 'TargetDate', 'Note', 'Date']);
+  var id = Utilities.getUuid();
+  appendRowByHeaders_(sheet, {
+    ID: id,
+    Name: body.name,
+    Type: body.type,
+    TargetAmount: Number(body.targetAmount) || 0,
+    TargetDate: body.targetDate || '',
+    Note: body.note || '',
+    Date: new Date(),
+  });
+  return jsonOutput_({ ok: true, id: id });
+}
+
+function deleteGoal_(body) {
+  deleteRowById_(GOALS_SHEET, body.id);
+  var savingsSheet = getOrCreateSheet_(SAVINGS_SHEET, ['ID', 'GoalID', 'Date', 'Amount', 'Note']);
+  var goalIdCol = getHeaders_(savingsSheet).indexOf('GoalID');
+  var values = savingsSheet.getDataRange().getValues();
+  for (var i = values.length - 1; i >= 1; i--) {
+    if (values[i][goalIdCol] === body.id) savingsSheet.deleteRow(i + 1);
+  }
+  return jsonOutput_({ ok: true });
+}
 
 function addSaving_(body) {
-  var sheet = getOrCreateSheet_(SAVINGS_SHEET, ['ID', 'Date', 'Amount', 'Note']);
+  var sheet = getOrCreateSheet_(SAVINGS_SHEET, ['ID', 'GoalID', 'Date', 'Amount', 'Note']);
   var id = Utilities.getUuid();
-  sheet.appendRow([id, body.date, Number(body.amount), body.note || '']);
+  appendRowByHeaders_(sheet, {
+    ID: id,
+    GoalID: body.goalId,
+    Date: body.date,
+    Amount: Number(body.amount),
+    Note: body.note || '',
+  });
   return jsonOutput_({ ok: true, id: id });
-}
-
-function setGoal_(body) {
-  setSettingValue_('GoalName', typeof body.goalName !== 'undefined' ? body.goalName : null);
-  setSettingValue_('GoalAmount', typeof body.goalAmount !== 'undefined' ? Number(body.goalAmount) : null);
-  return jsonOutput_({ ok: true });
 }
 
 // ---- Pins ----
@@ -232,9 +367,17 @@ function setSettingValue_(key, value) {
 // ---- Debts ----
 
 function addDebt_(body) {
-  var sheet = getOrCreateSheet_(DEBTS_SHEET, ['ID', 'Name', 'Type', 'Amount', 'Note', 'Date']);
+  var sheet = getOrCreateSheet_(DEBTS_SHEET, ['ID', 'Name', 'Type', 'Amount', 'Note', 'Date', 'Paid']);
   var id = Utilities.getUuid();
-  sheet.appendRow([id, body.name, body.type, Number(body.amount), body.note || '', body.date]);
+  appendRowByHeaders_(sheet, {
+    ID: id,
+    Name: body.name,
+    Type: body.type,
+    Amount: Number(body.amount),
+    Note: body.note || '',
+    Date: body.date,
+    Paid: false,
+  });
   return jsonOutput_({ ok: true, id: id });
 }
 
@@ -248,10 +391,24 @@ function deleteDebt_(body) {
   return jsonOutput_({ ok: true });
 }
 
+function toggleDebtPaid_(body) {
+  var sheet = getOrCreateSheet_(DEBTS_SHEET, ['ID', 'Name', 'Type', 'Amount', 'Note', 'Date', 'Paid']);
+  var rowIndex = findRowIndexById_(sheet, body.id);
+  if (rowIndex === -1) return jsonOutput_({ ok: false, error: 'Debt not found' });
+  setCellByHeader_(sheet, rowIndex, 'Paid', Boolean(body.paid));
+  return jsonOutput_({ ok: true });
+}
+
 function addDebtPayment_(body) {
   var sheet = getOrCreateSheet_(DEBT_PAYMENTS_SHEET, ['ID', 'DebtID', 'Date', 'Amount', 'Note']);
   var id = Utilities.getUuid();
-  sheet.appendRow([id, body.debtId, body.date, Number(body.amount), body.note || '']);
+  appendRowByHeaders_(sheet, {
+    ID: id,
+    DebtID: body.debtId,
+    Date: body.date,
+    Amount: Number(body.amount),
+    Note: body.note || '',
+  });
   return jsonOutput_({ ok: true, id: id });
 }
 
@@ -260,20 +417,22 @@ function addDebtPayment_(body) {
 function addTodo_(body) {
   var sheet = getOrCreateSheet_(TODOS_SHEET, ['ID', 'Month', 'Text', 'Done', 'Date']);
   var id = Utilities.getUuid();
-  sheet.appendRow([id, body.month, body.text, false, new Date()]);
+  appendRowByHeaders_(sheet, {
+    ID: id,
+    Month: body.month,
+    Text: body.text,
+    Done: false,
+    Date: new Date(),
+  });
   return jsonOutput_({ ok: true, id: id });
 }
 
 function updateTodo_(body) {
   var sheet = getOrCreateSheet_(TODOS_SHEET, ['ID', 'Month', 'Text', 'Done', 'Date']);
-  var values = sheet.getDataRange().getValues();
-  for (var i = 1; i < values.length; i++) {
-    if (values[i][0] === body.id) {
-      sheet.getRange(i + 1, 4).setValue(Boolean(body.done));
-      return jsonOutput_({ ok: true });
-    }
-  }
-  return jsonOutput_({ ok: false, error: 'Todo not found' });
+  var rowIndex = findRowIndexById_(sheet, body.id);
+  if (rowIndex === -1) return jsonOutput_({ ok: false, error: 'Todo not found' });
+  setCellByHeader_(sheet, rowIndex, 'Done', Boolean(body.done));
+  return jsonOutput_({ ok: true });
 }
 
 // ---- Notes ----
@@ -281,7 +440,12 @@ function updateTodo_(body) {
 function addNote_(body) {
   var sheet = getOrCreateSheet_(NOTES_SHEET, ['ID', 'Date', 'Title', 'Content']);
   var id = Utilities.getUuid();
-  sheet.appendRow([id, body.date, body.title || '', body.content || '']);
+  appendRowByHeaders_(sheet, {
+    ID: id,
+    Date: body.date,
+    Title: body.title || '',
+    Content: body.content || '',
+  });
   return jsonOutput_({ ok: true, id: id });
 }
 

@@ -6,11 +6,12 @@ const DataContext = createContext(null);
 export function DataProvider({ children }) {
   const [expenses, setExpenses] = useState([]);
   const [savings, setSavings] = useState([]);
+  const [goals, setGoals] = useState([]);
   const [debts, setDebts] = useState([]);
   const [debtPayments, setDebtPayments] = useState([]);
   const [todos, setTodos] = useState([]);
   const [notes, setNotes] = useState([]);
-  const [settings, setSettings] = useState({ GoalName: 'My Savings Goal', GoalAmount: 0 });
+  const [settings, setSettings] = useState({});
   const [role, setRole] = useState(getRole());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -20,6 +21,7 @@ export function DataProvider({ children }) {
   const applyData = (data) => {
     setExpenses(data.expenses || []);
     setSavings(data.savings || []);
+    setGoals(data.goals || []);
     setDebts(data.debts || []);
     setDebtPayments(data.debtPayments || []);
     setTodos(data.todos || []);
@@ -81,6 +83,7 @@ export function DataProvider({ children }) {
   const value = {
     expenses,
     savings,
+    goals,
     debts,
     debtPayments,
     todos,
@@ -99,14 +102,16 @@ export function DataProvider({ children }) {
     addExpense: wrap(api.addExpense),
     deleteExpense: wrap(api.deleteExpense),
 
+    addGoal: wrap(api.addGoal),
+    deleteGoal: wrap(api.deleteGoal),
     addSaving: wrap(api.addSaving),
     deleteSaving: wrap(api.deleteSaving),
 
-    setGoal: wrap(api.setGoal),
     setPins: wrap(api.setPins),
 
     addDebt: wrap(api.addDebt),
     deleteDebt: wrap(api.deleteDebt),
+    toggleDebtPaid: wrap(api.toggleDebtPaid),
     addDebtPayment: wrap(api.addDebtPayment),
     deleteDebtPayment: wrap(api.deleteDebtPayment),
 

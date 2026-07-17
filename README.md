@@ -9,9 +9,9 @@ Live site: https://Abid2k.github.io/Expense-tracking/
 ## Features
 
 - Add expenses with date, category, amount (SAR) and notes
-- Dashboard pie chart of spending by category, per month, plus summary cards (spend, top category, savings progress, debt outstanding)
-- Savings goal: set a target amount and add contributions any time; see progress as a bar
-- Debts: track things you owe or are owed, log payments against each, see paid-off progress
+- Dashboard with a category pie chart, a daily spending trend chart, smart stats (average daily spend, projected month total, days left), and at-a-glance widgets for savings goals, debts, and this month's to-dos
+- Savings: create multiple goals (e.g. "Monthly Savings", "Vacation 2027"), tagged Monthly/Yearly/One-time/Custom, with an optional target date that shows the monthly contribution needed to hit it on time
+- Debts: track things you owe or are owed; either log payments gradually and watch the progress bar, or just tick "Mark as Paid" to close one out instantly
 - Monthly to-do list
 - Notes tab for freeform notes
 - Reports page: monthly spending trend chart and a side-by-side month comparison (totals, % change, per-category diff)
@@ -40,8 +40,9 @@ writes rows in a Google Sheet you own. There is no separate backend server or da
 8. Copy the **Web app URL** it gives you (looks like `https://script.google.com/macros/s/XXXXXXXXXXXX/exec`).
 
 The script automatically creates all the sheets it needs the first time it runs
-(`Expenses`, `Savings`, `Debts`, `DebtPayments`, `Todos`, `Notes`, `Settings`) — you don't
-need to create these yourself.
+(`Expenses`, `Savings`, `Goals`, `Debts`, `DebtPayments`, `Todos`, `Notes`, `Settings`) — you
+don't need to create these yourself. It also safely upgrades sheets created by older versions
+of the script (e.g. adding the `Paid` column to `Debts`) without touching your existing data.
 
 ### 2. Connect the website to your sheet
 

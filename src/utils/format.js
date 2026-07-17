@@ -37,3 +37,18 @@ export function previousMonthKey(monthKey) {
   const date = new Date(year, month - 2, 1);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
+
+export function daysInMonth(monthKey) {
+  const [year, month] = monthKey.split('-').map(Number);
+  return new Date(year, month, 0).getDate();
+}
+
+export function monthsUntil(targetDateStr) {
+  if (!targetDateStr) return null;
+  const [ty, tm, td] = targetDateStr.split('-').map(Number);
+  const target = new Date(ty, tm - 1, td);
+  const now = new Date();
+  const months = (target.getFullYear() - now.getFullYear()) * 12 + (target.getMonth() - now.getMonth());
+  const adjusted = target.getDate() < now.getDate() ? months - 1 : months;
+  return Math.max(1, adjusted);
+}

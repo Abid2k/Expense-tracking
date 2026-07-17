@@ -23,3 +23,5 @@ export const CATEGORY_COLORS = {
 };
 
 export const DEBT_TYPES = ['I Owe', 'Owed to Me'];
+
+export const GOAL_TYPES = ['Monthly', 'Yearly', 'One-time', 'Custom'];

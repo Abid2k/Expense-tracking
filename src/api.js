@@ -70,14 +70,16 @@ export const api = {
   addExpense: (expense) => post('addExpense', expense),
   deleteExpense: (id) => post('deleteExpense', { id }),
 
+  addGoal: (goal) => post('addGoal', goal),
+  deleteGoal: (id) => post('deleteGoal', { id }),
   addSaving: (saving) => post('addSaving', saving),
   deleteSaving: (id) => post('deleteSaving', { id }),
 
-  setGoal: (goal) => post('setGoal', goal),
   setPins: (pins) => post('setPins', pins),
 
   addDebt: (debt) => post('addDebt', debt),
   deleteDebt: (id) => post('deleteDebt', { id }),
+  toggleDebtPaid: (id, paid) => post('toggleDebtPaid', { id, paid }),
   addDebtPayment: (payment) => post('addDebtPayment', payment),
   deleteDebtPayment: (id) => post('deleteDebtPayment', { id }),
 

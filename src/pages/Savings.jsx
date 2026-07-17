@@ -3,19 +3,55 @@ import { useData } from '../context/DataContext';
 import { GOAL_TYPES } from '../constants';
 import { formatSAR, toDateStr, todayStr, monthsUntil } from '../utils/format';
 
-function GoalCard({ goal, contributions, isOwner, onAddContribution, onDelete }) {
+function GoalCard({ goal, contributions, isOwner, onAddContribution, onDelete, onUpdate }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ date: todayStr(), amount: '', note: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState(null);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState('');
+
   const target = Number(goal.TargetAmount) || 0;
+  const hasTarget = target > 0;
   const saved = contributions.reduce((sum, c) => sum + Number(c.Amount), 0);
   const remaining = Math.max(0, target - saved);
-  const pct = target > 0 ? Math.min(100, (saved / target) * 100) : 0;
+  const pct = hasTarget ? Math.min(100, (saved / target) * 100) : 0;
 
-  const months = goal.TargetDate ? monthsUntil(goal.TargetDate) : null;
+  const months = hasTarget && goal.TargetDate ? monthsUntil(goal.TargetDate) : null;
   const requiredMonthly = months && remaining > 0 ? remaining / months : 0;
+
+  function startEdit() {
+    setEditForm({
+      name: goal.Name,
+      type: goal.Type,
+      targetAmount: goal.TargetAmount || '',
+      targetDate: goal.TargetDate || '',
+      note: goal.Note || '',
+    });
+    setEditError('');
+    setEditing(true);
+  }
+
+  async function handleEditSubmit(e) {
+    e.preventDefault();
+    setEditError('');
+    if (!editForm.name) {
+      setEditError('Please provide a name.');
+      return;
+    }
+    setEditSaving(true);
+    try {
+      await onUpdate(goal.ID, editForm);
+      setEditing(false);
+    } catch (err) {
+      setEditError(err.message);
+    } finally {
+      setEditSaving(false);
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -37,6 +73,43 @@ function GoalCard({ goal, contributions, isOwner, onAddContribution, onDelete })
     }
   }
 
+  if (editing) {
+    return (
+      <form className="card" onSubmit={handleEditSubmit}>
+        <h2>Edit Goal</h2>
+        <div className="form-grid">
+          <div>
+            <label>Name</label>
+            <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+          </div>
+          <div>
+            <label>Type</label>
+            <select value={editForm.type} onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}>
+              {GOAL_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div>
+            <label>Target Amount (optional)</label>
+            <input type="number" step="0.01" min="0" value={editForm.targetAmount} onChange={(e) => setEditForm({ ...editForm, targetAmount: e.target.value })} />
+          </div>
+          <div>
+            <label>Target Date (optional)</label>
+            <input type="date" value={editForm.targetDate} onChange={(e) => setEditForm({ ...editForm, targetDate: e.target.value })} />
+          </div>
+          <div>
+            <label>Note (optional)</label>
+            <input type="text" value={editForm.note} onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} />
+          </div>
+        </div>
+        {editError && <p className="error-text">{editError}</p>}
+        <div className="button-row">
+          <button type="submit" disabled={editSaving}>{editSaving ? 'Saving…' : 'Save Changes'}</button>
+          <button type="button" className="secondary" onClick={() => setEditing(false)}>Cancel</button>
+        </div>
+      </form>
+    );
+  }
+
   return (
     <div className="card">
       <div className="page-header">
@@ -44,21 +117,31 @@ function GoalCard({ goal, contributions, isOwner, onAddContribution, onDelete })
           {goal.Name} <span className="role-badge">{goal.Type}</span>
         </h2>
         {isOwner && (
-          <button className="danger small" onClick={() => onDelete(goal.ID)}>Delete</button>
+          <div className="button-row">
+            <button className="secondary small" onClick={startEdit}>Edit</button>
+            <button className="danger small" onClick={() => onDelete(goal.ID)}>Delete</button>
+          </div>
         )}
       </div>
-      <div className="progress-bar large">
-        <div className="progress-fill" style={{ width: `${pct}%` }} />
-      </div>
-      <p className="muted">
-        {formatSAR(saved)} of {formatSAR(target)} saved ({pct.toFixed(0)}%)
-        {target > 0 && ` — ${formatSAR(remaining)} to go`}
-      </p>
-      {goal.TargetDate && (
-        <p className="muted">
-          Target date: {goal.TargetDate}
-          {requiredMonthly > 0 && ` — need ~${formatSAR(requiredMonthly)}/month to reach this on time`}
-        </p>
+
+      {hasTarget ? (
+        <>
+          <div className="progress-bar large">
+            <div className="progress-fill" style={{ width: `${pct}%` }} />
+          </div>
+          <p className="muted">
+            {formatSAR(saved)} of {formatSAR(target)} saved ({pct.toFixed(0)}%)
+            {` — ${formatSAR(remaining)} to go`}
+          </p>
+          {goal.TargetDate && (
+            <p className="muted">
+              Target date: {goal.TargetDate}
+              {requiredMonthly > 0 && ` — need ~${formatSAR(requiredMonthly)}/month to reach this on time`}
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="summary-value success-text" style={{ fontSize: 22 }}>{formatSAR(saved)} saved</p>
       )}
       {goal.Note && <p className="muted">{goal.Note}</p>}
 
@@ -111,7 +194,7 @@ function GoalCard({ goal, contributions, isOwner, onAddContribution, onDelete })
 }
 
 export default function Savings() {
-  const { goals, savings, addGoal, deleteGoal, addSaving, isOwner, loading, configured } = useData();
+  const { goals, savings, addGoal, updateGoal, deleteGoal, addSaving, isOwner, loading, configured } = useData();
   const [form, setForm] = useState({ name: '', type: GOAL_TYPES[0], targetAmount: '', targetDate: '', note: '' });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
@@ -132,9 +215,8 @@ export default function Savings() {
   async function handleSubmit(e) {
     e.preventDefault();
     setFormError('');
-    const targetAmount = Number(form.targetAmount);
-    if (!form.name || !targetAmount || targetAmount <= 0) {
-      setFormError('Please provide a name and a positive target amount.');
+    if (!form.name) {
+      setFormError('Please provide a name for this goal.');
       return;
     }
     setSaving(true);
@@ -178,10 +260,14 @@ export default function Savings() {
       {isOwner && (
         <form className="card" onSubmit={handleSubmit}>
           <h2>Add New Goal</h2>
+          <p className="muted">
+            Leave the target amount blank for open-ended savings with no specific goal — just a
+            running total you top up whenever you want.
+          </p>
           <div className="form-grid">
             <div>
               <label>Name</label>
-              <input type="text" placeholder="e.g. Vacation 2027" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <input type="text" placeholder="e.g. Monthly Savings, Vacation 2027" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
             </div>
             <div>
               <label>Type</label>
@@ -190,8 +276,8 @@ export default function Savings() {
               </select>
             </div>
             <div>
-              <label>Target Amount (SAR)</label>
-              <input type="number" step="0.01" min="0" value={form.targetAmount} onChange={(e) => setForm({ ...form, targetAmount: e.target.value })} />
+              <label>Target Amount (optional)</label>
+              <input type="number" step="0.01" min="0" placeholder="Leave blank for no target" value={form.targetAmount} onChange={(e) => setForm({ ...form, targetAmount: e.target.value })} />
             </div>
             <div>
               <label>Target Date (optional)</label>
@@ -208,7 +294,7 @@ export default function Savings() {
       )}
 
       {loading ? (
-        <p className="muted">Loading…</p>
+        <p className="muted loading-pulse">Loading…</p>
       ) : goals.length === 0 ? (
         <div className="card"><p className="muted">No savings goals yet.</p></div>
       ) : (
@@ -220,6 +306,7 @@ export default function Savings() {
             isOwner={isOwner}
             onAddContribution={(goalId, contribution) => addSaving({ goalId, ...contribution })}
             onDelete={deleteGoal}
+            onUpdate={updateGoal}
           />
         ))
       )}

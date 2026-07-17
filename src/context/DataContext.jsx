@@ -103,6 +103,7 @@ export function DataProvider({ children }) {
     deleteExpense: wrap(api.deleteExpense),
 
     addGoal: wrap(api.addGoal),
+    updateGoal: wrap(api.updateGoal),
     deleteGoal: wrap(api.deleteGoal),
     addSaving: wrap(api.addSaving),
     deleteSaving: wrap(api.deleteSaving),
@@ -110,6 +111,7 @@ export function DataProvider({ children }) {
     setPins: wrap(api.setPins),
 
     addDebt: wrap(api.addDebt),
+    updateDebt: wrap(api.updateDebt),
     deleteDebt: wrap(api.deleteDebt),
     toggleDebtPaid: wrap(api.toggleDebtPaid),
     addDebtPayment: wrap(api.addDebtPayment),

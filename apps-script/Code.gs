@@ -86,6 +86,17 @@ function setCellByHeader_(sheet, rowIndex, headerName, value) {
   sheet.getRange(rowIndex, col).setValue(value);
 }
 
+// Updates only the headers present in valuesObj, leaving other columns (like
+// ID or Paid) untouched. Returns false if no row with this ID exists.
+function updateRowByHeaders_(sheet, id, valuesObj) {
+  var rowIndex = findRowIndexById_(sheet, id);
+  if (rowIndex === -1) return false;
+  Object.keys(valuesObj).forEach(function (header) {
+    setCellByHeader_(sheet, rowIndex, header, valuesObj[header]);
+  });
+  return true;
+}
+
 function ensureSheets_() {
   getOrCreateSheet_(EXPENSES_SHEET, ['ID', 'Date', 'Category', 'Amount', 'Note']);
 
@@ -262,6 +273,7 @@ function doPost(e) {
     if (action === 'deleteExpense') return deleteRowById_(EXPENSES_SHEET, body.id);
 
     if (action === 'addGoal') return addGoal_(body);
+    if (action === 'updateGoal') return updateGoal_(body);
     if (action === 'deleteGoal') return deleteGoal_(body);
     if (action === 'addSaving') return addSaving_(body);
     if (action === 'deleteSaving') return deleteRowById_(SAVINGS_SHEET, body.id);
@@ -269,6 +281,7 @@ function doPost(e) {
     if (action === 'setPins') return setPins_(body);
 
     if (action === 'addDebt') return addDebt_(body);
+    if (action === 'updateDebt') return updateDebt_(body);
     if (action === 'deleteDebt') return deleteDebt_(body);
     if (action === 'toggleDebtPaid') return toggleDebtPaid_(body);
     if (action === 'addDebtPayment') return addDebtPayment_(body);
@@ -317,6 +330,19 @@ function addGoal_(body) {
     Date: new Date(),
   });
   return jsonOutput_({ ok: true, id: id });
+}
+
+function updateGoal_(body) {
+  var sheet = getOrCreateSheet_(GOALS_SHEET, ['ID', 'Name', 'Type', 'TargetAmount', 'TargetDate', 'Note', 'Date']);
+  var fields = {};
+  if (typeof body.name !== 'undefined') fields.Name = body.name;
+  if (typeof body.type !== 'undefined') fields.Type = body.type;
+  if (typeof body.targetAmount !== 'undefined') fields.TargetAmount = Number(body.targetAmount) || 0;
+  if (typeof body.targetDate !== 'undefined') fields.TargetDate = body.targetDate || '';
+  if (typeof body.note !== 'undefined') fields.Note = body.note || '';
+  var found = updateRowByHeaders_(sheet, body.id, fields);
+  if (!found) return jsonOutput_({ ok: false, error: 'Goal not found' });
+  return jsonOutput_({ ok: true });
 }
 
 function deleteGoal_(body) {
@@ -379,6 +405,19 @@ function addDebt_(body) {
     Paid: false,
   });
   return jsonOutput_({ ok: true, id: id });
+}
+
+function updateDebt_(body) {
+  var sheet = getOrCreateSheet_(DEBTS_SHEET, ['ID', 'Name', 'Type', 'Amount', 'Note', 'Date', 'Paid']);
+  var fields = {};
+  if (typeof body.name !== 'undefined') fields.Name = body.name;
+  if (typeof body.type !== 'undefined') fields.Type = body.type;
+  if (typeof body.amount !== 'undefined') fields.Amount = Number(body.amount);
+  if (typeof body.note !== 'undefined') fields.Note = body.note || '';
+  if (typeof body.date !== 'undefined') fields.Date = body.date;
+  var found = updateRowByHeaders_(sheet, body.id, fields);
+  if (!found) return jsonOutput_({ ok: false, error: 'Debt not found' });
+  return jsonOutput_({ ok: true });
 }
 
 function deleteDebt_(body) {

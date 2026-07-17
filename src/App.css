@@ -7,6 +7,7 @@
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
   gap: 12px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .navbar-brand {
@@ -27,11 +28,13 @@
   text-decoration: none;
   color: var(--text);
   font-weight: 500;
-  transition: background 0.15s;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  display: inline-block;
 }
 
 .nav-link:hover {
   background: rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
 }
 
 .nav-link.active {
@@ -52,6 +55,27 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  animation: fadeInUp 0.35s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.loading-pulse {
+  animation: pulse 1.4s ease-in-out infinite;
 }
 
 .page-header {
@@ -70,6 +94,13 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 .summary-grid {
@@ -131,6 +162,13 @@ input, select, textarea {
   background: var(--bg);
   color: var(--text-h);
   font: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 textarea {
@@ -156,12 +194,17 @@ button {
   background: var(--accent);
   color: white;
   font-weight: 600;
-  transition: background 0.15s;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
   align-self: flex-start;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   background: var(--accent-hover);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.96);
 }
 
 button:disabled {
@@ -254,6 +297,29 @@ ol {
   font-size: 22px;
 }
 
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: background 0.15s ease, transform 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background: rgba(59, 130, 246, 0.1);
+  transform: rotate(15deg);
+}
+
+.theme-toggle:active {
+  transform: scale(0.9);
+}
+
 .role-badge {
   font-size: 12px;
   font-weight: 600;
@@ -287,6 +353,13 @@ ol {
 .checklist-item.done span.item-text {
   text-decoration: line-through;
   opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+
+.checklist-item input[type='checkbox'] {
+  width: auto;
+  accent-color: var(--accent);
+  cursor: pointer;
 }
 
 .item-text {

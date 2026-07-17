@@ -125,7 +125,7 @@ export default function Expenses() {
         <p className="muted">Total for {monthLabel(monthKey)}: <strong>{formatSAR(monthTotal)}</strong></p>
 
         {loading ? (
-          <p className="muted">Loading…</p>
+          <p className="muted loading-pulse">Loading…</p>
         ) : monthExpenses.length === 0 ? (
           <p className="muted">No expenses for this month.</p>
         ) : (

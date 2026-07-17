@@ -122,7 +122,7 @@ export default function Dashboard() {
       </div>
 
       {error && <p className="error-text">{error}</p>}
-      {loading && <p className="muted">Loading…</p>}
+      {loading && <p className="muted loading-pulse">Loading…</p>}
 
       <div className="summary-grid">
         <div className="card summary-card">

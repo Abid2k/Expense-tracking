@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useData } from '../context/DataContext';
+import { useTheme } from '../hooks/useTheme';
 
 const links = [
   { to: '/', label: 'Dashboard', end: true },
@@ -14,6 +15,7 @@ const links = [
 
 export default function NavBar() {
   const { role, lock } = useData();
+  const { isDark, toggle } = useTheme();
 
   return (
     <nav className="navbar">
@@ -30,12 +32,17 @@ export default function NavBar() {
           </NavLink>
         ))}
       </div>
-      {role && (
-        <div className="button-row" style={{ alignItems: 'center' }}>
-          <span className="role-badge">{role === 'owner' ? 'Owner' : 'Viewer'}</span>
-          <button className="secondary small" onClick={lock}>Lock</button>
-        </div>
-      )}
+      <div className="button-row" style={{ alignItems: 'center' }}>
+        <button className="theme-toggle" onClick={toggle} title="Toggle light/dark mode" aria-label="Toggle light/dark mode">
+          {isDark ? '☀️' : '🌙'}
+        </button>
+        {role && (
+          <>
+            <span className="role-badge">{role === 'owner' ? 'Owner' : 'Viewer'}</span>
+            <button className="secondary small" onClick={lock}>Lock</button>
+          </>
+        )}
+      </div>
     </nav>
   );
 }

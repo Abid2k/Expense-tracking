@@ -10,11 +10,12 @@ Live site: https://Abid2k.github.io/Expense-tracking/
 
 - Add expenses with date, category, amount (SAR) and notes
 - Dashboard with a category pie chart, a daily spending trend chart, smart stats (average daily spend, projected month total, days left), and at-a-glance widgets for savings goals, debts, and this month's to-dos
-- Savings: create multiple goals (e.g. "Monthly Savings", "Vacation 2027"), tagged Monthly/Yearly/One-time/Custom, with an optional target date that shows the monthly contribution needed to hit it on time
-- Debts: track things you owe or are owed; either log payments gradually and watch the progress bar, or just tick "Mark as Paid" to close one out instantly
+- Savings: create multiple goals (e.g. "Monthly Savings", "Vacation 2027"), tagged Monthly/Yearly/One-time/General/Custom. Leave the target amount blank for open-ended savings with no specific goal — just a running total. Add an optional target date to see the monthly contribution needed to hit it on time. Edit any goal later if you make a mistake
+- Debts: track things you owe or are owed; either log payments gradually and watch the progress bar, or just tick "Mark as Paid" to close one out instantly. Edit any debt later if you make a mistake
 - Monthly to-do list
 - Notes tab for freeform notes
 - Reports page: monthly spending trend chart and a side-by-side month comparison (totals, % change, per-category diff)
+- Light/dark mode toggle in the navbar (persists per browser, independent of your system setting)
 - Privacy: lock the whole site behind an Owner PIN, with an optional separate Viewer PIN you can share with someone for read-only access
 - All data is stored in your own Google Sheet, so it's private to you and easy to inspect/edit directly
 

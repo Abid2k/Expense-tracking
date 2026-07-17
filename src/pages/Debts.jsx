@@ -13,11 +13,16 @@ function debtRemaining(debt, payments) {
   return Math.max(0, Number(debt.Amount) - paid);
 }
 
-function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete, onTogglePaid }) {
+function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete, onTogglePaid, onUpdate }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ date: todayStr(), amount: '', note: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState(null);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState('');
 
   const paidFlag = isDebtPaid(debt);
   const amount = Number(debt.Amount);
@@ -25,6 +30,31 @@ function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete, onTogglePai
   const remaining = Math.max(0, amount - paidAmount);
   const pct = paidFlag ? 100 : amount > 0 ? Math.min(100, (paidAmount / amount) * 100) : 0;
   const isOwed = debt.Type === 'Owed to Me';
+
+  function startEdit() {
+    setEditForm({ name: debt.Name, type: debt.Type, amount: debt.Amount, note: debt.Note || '', date: toDateStr(debt.Date) });
+    setEditError('');
+    setEditing(true);
+  }
+
+  async function handleEditSubmit(e) {
+    e.preventDefault();
+    setEditError('');
+    const amt = Number(editForm.amount);
+    if (!editForm.name || !amt || amt <= 0 || !editForm.date) {
+      setEditError('Please provide a name, date, and a positive amount.');
+      return;
+    }
+    setEditSaving(true);
+    try {
+      await onUpdate(debt.ID, editForm);
+      setEditing(false);
+    } catch (err) {
+      setEditError(err.message);
+    } finally {
+      setEditSaving(false);
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -46,6 +76,43 @@ function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete, onTogglePai
     }
   }
 
+  if (editing) {
+    return (
+      <form className="card" onSubmit={handleEditSubmit}>
+        <h2>Edit Debt</h2>
+        <div className="form-grid">
+          <div>
+            <label>Name</label>
+            <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+          </div>
+          <div>
+            <label>Type</label>
+            <select value={editForm.type} onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}>
+              {DEBT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div>
+            <label>Amount (SAR)</label>
+            <input type="number" step="0.01" min="0" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} />
+          </div>
+          <div>
+            <label>Date</label>
+            <input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} />
+          </div>
+          <div>
+            <label>Note (optional)</label>
+            <input type="text" value={editForm.note} onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} />
+          </div>
+        </div>
+        {editError && <p className="error-text">{editError}</p>}
+        <div className="button-row">
+          <button type="submit" disabled={editSaving}>{editSaving ? 'Saving…' : 'Save Changes'}</button>
+          <button type="button" className="secondary" onClick={() => setEditing(false)}>Cancel</button>
+        </div>
+      </form>
+    );
+  }
+
   return (
     <div className={paidFlag ? 'card debt-paid' : 'card'}>
       <div className="page-header">
@@ -54,7 +121,10 @@ function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete, onTogglePai
           {paidFlag && <span className="role-badge" style={{ marginLeft: 8 }}>Paid</span>}
         </h2>
         {isOwner && (
-          <button className="danger small" onClick={() => onDelete(debt.ID)}>Delete</button>
+          <div className="button-row">
+            <button className="secondary small" onClick={startEdit}>Edit</button>
+            <button className="danger small" onClick={() => onDelete(debt.ID)}>Delete</button>
+          </div>
         )}
       </div>
       <div className="progress-bar large">
@@ -126,7 +196,7 @@ function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete, onTogglePai
 }
 
 export default function Debts() {
-  const { debts, debtPayments, addDebt, deleteDebt, addDebtPayment, toggleDebtPaid, isOwner, loading, configured } = useData();
+  const { debts, debtPayments, addDebt, updateDebt, deleteDebt, addDebtPayment, toggleDebtPaid, isOwner, loading, configured } = useData();
   const [form, setForm] = useState({ name: '', type: DEBT_TYPES[0], amount: '', note: '', date: todayStr() });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
@@ -224,7 +294,7 @@ export default function Debts() {
       )}
 
       {loading ? (
-        <p className="muted">Loading…</p>
+        <p className="muted loading-pulse">Loading…</p>
       ) : debts.length === 0 ? (
         <div className="card"><p className="muted">No debts recorded.</p></div>
       ) : (
@@ -237,6 +307,7 @@ export default function Debts() {
             onAddPayment={(debtId, payment) => addDebtPayment({ debtId, ...payment })}
             onDelete={deleteDebt}
             onTogglePaid={toggleDebtPaid}
+            onUpdate={updateDebt}
           />
         ))
       )}

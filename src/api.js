@@ -71,6 +71,7 @@ export const api = {
   deleteExpense: (id) => post('deleteExpense', { id }),
 
   addGoal: (goal) => post('addGoal', goal),
+  updateGoal: (id, goal) => post('updateGoal', { id, ...goal }),
   deleteGoal: (id) => post('deleteGoal', { id }),
   addSaving: (saving) => post('addSaving', saving),
   deleteSaving: (id) => post('deleteSaving', { id }),
@@ -78,6 +79,7 @@ export const api = {
   setPins: (pins) => post('setPins', pins),
 
   addDebt: (debt) => post('addDebt', debt),
+  updateDebt: (id, debt) => post('updateDebt', { id, ...debt }),
   deleteDebt: (id) => post('deleteDebt', { id }),
   toggleDebtPaid: (id, paid) => post('toggleDebtPaid', { id, paid }),
   addDebtPayment: (payment) => post('addDebtPayment', payment),

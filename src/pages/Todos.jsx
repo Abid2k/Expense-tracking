@@ -67,7 +67,7 @@ export default function Todos() {
         )}
 
         {loading ? (
-          <p className="muted">Loading…</p>
+          <p className="muted loading-pulse">Loading…</p>
         ) : monthTodos.length === 0 ? (
           <p className="muted">No tasks for {monthLabel(monthKey)} yet.</p>
         ) : (

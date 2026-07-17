@@ -68,7 +68,7 @@ export default function Notes() {
       )}
 
       {loading ? (
-        <p className="muted">Loading…</p>
+        <p className="muted loading-pulse">Loading…</p>
       ) : sortedNotes.length === 0 ? (
         <div className="card"><p className="muted">No notes yet.</p></div>
       ) : (

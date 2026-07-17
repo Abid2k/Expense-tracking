@@ -1,7 +1,7 @@
 .navbar {
   display: flex;
   flex-direction: column;
-  padding: 12px 24px;
+  padding: calc(12px + env(safe-area-inset-top)) 24px 12px;
   background: var(--card-bg);
   border-bottom: 1px solid var(--border);
   gap: 10px;
@@ -141,7 +141,7 @@
   }
 
   .navbar {
-    padding: 12px 14px;
+    padding: calc(12px + env(safe-area-inset-top)) 14px 12px;
   }
 
   .navbar-brand {

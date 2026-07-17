@@ -19,7 +19,13 @@ export function monthLabel(monthKey) {
 }
 
 export function todayStr() {
-  return new Date().toISOString().slice(0, 10);
+  // Build from local date parts — toISOString() converts to UTC first,
+  // which rolls the date back a day in UTC+ timezones during early morning hours.
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export function currentMonthKey() {

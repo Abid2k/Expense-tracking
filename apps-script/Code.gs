@@ -61,12 +61,23 @@ function sheetToObjects_(sheet) {
     if (row.join('') === '') continue;
     var obj = {};
     for (var j = 0; j < headers.length; j++) {
-      obj[headers[j]] = row[j];
+      obj[headers[j]] = formatCellValue_(row[j]);
     }
     obj._row = i + 1;
     rows.push(obj);
   }
   return rows;
+}
+
+function formatCellValue_(value) {
+  // Sheets auto-converts date-like strings (e.g. "2026-07-17") into real Date
+  // objects. JSON.stringify then serializes Dates via toISOString() (UTC),
+  // which rolls the calendar date back a day in UTC+ timezones. Reformat
+  // using the spreadsheet's own timezone so the date round-trips correctly.
+  if (Object.prototype.toString.call(value) === '[object Date]') {
+    return Utilities.formatDate(value, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  }
+  return value;
 }
 
 function jsonOutput_(data) {

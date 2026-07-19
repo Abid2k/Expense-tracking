@@ -435,14 +435,28 @@ ol {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));
 }
 
 .lock-card {
   width: 100%;
-  max-width: 320px;
+  max-width: 340px;
   align-items: stretch;
   text-align: center;
+}
+
+.lock-card button {
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .lock-screen {
+    padding: calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));
+  }
+
+  .lock-card h1 {
+    font-size: 19px;
+  }
 }
 
 .lock-card h1 {

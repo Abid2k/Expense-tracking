@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../hooks/useTheme';
 import { useIsMobile } from '../hooks/useIsMobile';
 
@@ -17,22 +17,22 @@ const links = [
 ];
 
 export default function NavBar() {
-  const { role, lock } = useData();
+  const { user, signOut } = useAuth();
   const { isDark, toggle } = useTheme();
   const isMobile = useIsMobile(768);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const roleControls = role && (
+  const roleControls = user && (
     <>
-      <span className="role-badge">{role === 'owner' ? 'Owner' : 'Viewer'}</span>
+      <span className="role-badge">{user.email}</span>
       <button
         className="secondary small"
         onClick={() => {
-          lock();
+          signOut();
           setMenuOpen(false);
         }}
       >
-        Lock
+        Sign Out
       </button>
     </>
   );
@@ -59,7 +59,7 @@ export default function NavBar() {
         </div>
       </div>
       <div className={menuOpen ? 'navbar-links open' : 'navbar-links'}>
-        {isMobile && role && <div className="navbar-drawer-meta">{roleControls}</div>}
+        {isMobile && user && <div className="navbar-drawer-meta">{roleControls}</div>}
         {links.map((link) => (
           <NavLink
             key={link.to}

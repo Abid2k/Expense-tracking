@@ -1,41 +1,32 @@
 import { useState } from 'react';
-import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function LockScreen() {
-  const { unlock } = useData();
-  const [pin, setPin] = useState('');
-  const [error, setError] = useState('');
+  const { signInWithGoogle } = useAuth();
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSignIn() {
     setBusy(true);
     setError('');
     try {
-      await unlock(pin);
+      await signInWithGoogle();
     } catch (err) {
-      setError(err.message || 'Incorrect PIN');
-    } finally {
+      setError(err.message || 'Sign-in failed');
       setBusy(false);
     }
   }
 
   return (
     <div className="lock-screen">
-      <form className="card lock-card" onSubmit={handleSubmit}>
-        <h1>🔒 Locked</h1>
-        <p className="muted">Enter your access PIN to continue.</p>
-        <input
-          type="password"
-          inputMode="numeric"
-          placeholder="PIN"
-          autoFocus
-          value={pin}
-          onChange={(e) => setPin(e.target.value)}
-        />
+      <div className="card lock-card">
+        <h1>💰 Expense Tracker</h1>
+        <p className="muted">Sign in with Google to see your private data.</p>
         {error && <p className="error-text">{error}</p>}
-        <button type="submit" disabled={busy}>{busy ? 'Checking…' : 'Unlock'}</button>
-      </form>
+        <button type="button" onClick={handleSignIn} disabled={busy}>
+          {busy ? 'Redirecting…' : 'Sign in with Google'}
+        </button>
+      </div>
     </div>
   );
 }

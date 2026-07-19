@@ -1,8 +1,9 @@
 # Expense Tracker
 
 A personal expense tracker with charts, a savings goal tracker, debt tracking, a monthly
-to-do list, notes, and monthly reports — built with React and using a Google Sheet as its
-database (no server or paid hosting needed).
+to-do list, notes, a daily habit tracker, and monthly reports — built with React. Sign in
+with Google; your data lives in your own private Supabase account, isolated from every
+other user.
 
 Live site: https://Abid2k.github.io/Expense-tracking/
 
@@ -13,69 +14,74 @@ Live site: https://Abid2k.github.io/Expense-tracking/
 - Savings: create multiple goals (e.g. "Monthly Savings", "Vacation 2027"), tagged Monthly/Yearly/One-time/General/Custom. Leave the target amount blank for open-ended savings with no specific goal — just a running total. Add an optional target date to see the monthly contribution needed to hit it on time. Edit any goal later if you make a mistake
 - Debts: track things you owe or are owed; either log payments gradually and watch the progress bar, or just tick "Mark as Paid" to close one out instantly. Edit any debt later if you make a mistake
 - Monthly to-do list
+- Daily habit tracker: a 31-day grid per habit, tap a day to mark it done, plus a monthly progress chart
 - Notes tab for freeform notes
 - Reports page: monthly spending trend chart and a side-by-side month comparison (totals, % change, per-category diff)
 - Light/dark mode toggle in the navbar (persists per browser, independent of your system setting)
-- Privacy: lock the whole site behind an Owner PIN, with an optional separate Viewer PIN you can share with someone for read-only access
-- All data is stored in your own Google Sheet, so it's private to you and easy to inspect/edit directly
+- Sign in with your Google account — no passwords, no PINs. Your data is private to your account; nobody else can see or share it
+- Add it to your phone's home screen for a one-tap app icon (see below)
 
 ## How it works
 
-The website is a static React app hosted for free on GitHub Pages. It talks to a small
-Google Apps Script "Web App" (also free, hosted on Google's infrastructure) which reads and
-writes rows in a Google Sheet you own. There is no separate backend server or database to pay for.
+The website is a static React app hosted for free on GitHub Pages. It talks directly to
+[Supabase](https://supabase.com) (hosted Postgres + Auth) — there's no custom backend server.
+Google is the identity provider (via Supabase Auth); Postgres row-level security ensures each
+signed-in account only ever sees its own rows.
 
-## One-time setup
+## One-time setup (for running your own copy)
 
-### 1. Create the Google Sheet backend
+The live site above already has this configured. These steps are only needed if you're
+deploying your own fork.
 
-1. Go to [sheets.google.com](https://sheets.google.com) and create a new blank spreadsheet (e.g. name it "Expense Tracker Data").
-2. In the sheet, open **Extensions → Apps Script**.
-3. Delete any starter code in the editor, then paste in the entire contents of [`apps-script/Code.gs`](./apps-script/Code.gs) from this repo.
-4. Click **Deploy → New deployment**.
-5. Click the gear icon next to "Select type" and choose **Web app**.
-6. Set:
-   - **Execute as:** Me
-   - **Who has access:** Anyone
-7. Click **Deploy**. The first time, Google will ask you to authorize the script — approve it (you may see an "unverified app" warning since it's your own script; click **Advanced → Go to (project name)** to proceed).
-8. Copy the **Web app URL** it gives you (looks like `https://script.google.com/macros/s/XXXXXXXXXXXX/exec`).
+### 1. Create a Supabase project
 
-The script automatically creates all the sheets it needs the first time it runs
-(`Expenses`, `Savings`, `Goals`, `Debts`, `DebtPayments`, `Todos`, `Notes`, `Settings`) — you
-don't need to create these yourself. It also safely upgrades sheets created by older versions
-of the script (e.g. adding the `Paid` column to `Debts`) without touching your existing data.
+1. Go to [supabase.com](https://supabase.com) and create a new project.
+2. In the SQL Editor, paste and run the contents of [`supabase/schema.sql`](./supabase/schema.sql) from this repo. This creates all 9 tables and their row-level-security policies.
+3. Under **Project Settings → API**, note your **Project URL** and **anon public key** — you'll need these below.
 
-### 2. Connect the website to your sheet
+### 2. Set up Google sign-in
 
-1. Open the live site: https://Abid2k.github.io/Expense-tracking/
-2. Go to **Settings**.
-3. Paste the Web app URL you copied above.
-4. Click **Test Connection**, then **Save**.
+1. In [Google Cloud Console](https://console.cloud.google.com), create (or select) a project → **APIs & Services → Credentials → Create OAuth client ID** (type: Web application).
+   - **Authorized redirect URI:** `https://<your-project-ref>.supabase.co/auth/v1/callback` (Supabase shows you this exact URL in step 2 below).
+   - **Authorized JavaScript origins:** your GitHub Pages URL, plus `http://localhost:5173` for local dev.
+2. Copy the generated **Client ID** and **Client Secret**.
+3. In the Supabase Dashboard → **Authentication → Providers → Google**, paste the Client ID + Secret and enable the provider.
+4. In Supabase Dashboard → **Authentication → URL Configuration**, set **Site URL** to your GitHub Pages URL, and add both the GitHub Pages URL and `localhost:5173` to **Redirect URLs**.
 
-Your data now lives in your Google Sheet — you can open the sheet directly at any time to view or edit it.
+### 3. Configure the app
 
-> **Note:** each browser/device stores the Web App URL locally (in `localStorage`). If you use the site from a new browser or device, you'll need to paste the URL into Settings again there too — the underlying data is the same shared Google Sheet either way.
+Copy `.env.example` to `.env.local` and fill in your Supabase Project URL and anon key:
 
-### 3. Make it private (recommended)
+```
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
 
-By default, anyone who has both your GitHub Pages link *and* your Apps Script URL could see
-and edit your data — so it's worth locking it down:
+For the deployed GitHub Pages build, add the same two values as **repository secrets**
+(**Settings → Secrets and variables → Actions**) named `VITE_SUPABASE_URL` and
+`VITE_SUPABASE_ANON_KEY` — the deploy workflow reads them at build time.
 
-1. On the live site, go to **Settings**.
-2. Under **Privacy — Access PINs**, set an **Owner PIN**. This is checked on the Google Sheet
-   side (not just hidden in the page), so it's real protection, not just cosmetic.
-3. You'll immediately be asked to re-enter that PIN to confirm — this is expected.
-4. Once set, anyone loading the site (including you, on a new browser/device) must enter the
-   correct PIN before any data loads.
+### 4. Migrate data from the old Google Sheet version (optional, one-time)
 
-**To share read-only access with someone** (e.g. a family member): set a separate **Viewer PIN**
-in the same Settings section, and give that person the site link + the Viewer PIN. They'll be
-able to see everything, but every add/edit/delete action is rejected for that PIN — enforced by
-the script itself, not just hidden buttons in the UI.
+If you used the previous PIN/Google Sheet version of this app and want to carry that history
+into your new account:
 
-Use the **Lock** button in the navbar any time to end your session on a shared/public computer.
+1. Sign in with Google on the new site at least once (this creates your `auth.users` row).
+2. Create `.env.migrate` in the project root (gitignored — never commit it) with:
+   ```
+   APPS_SCRIPT_URL=https://script.google.com/macros/s/XXXXXXXX/exec
+   APPS_SCRIPT_PIN=your-old-owner-pin
+   SUPABASE_URL=https://your-project-ref.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   TARGET_USER_EMAIL=you@gmail.com
+   ```
+   The service role key is under **Project Settings → API** — treat it like a password, it
+   bypasses row-level security entirely.
+3. Run `npm run migrate`. It prints a row count per table when done.
 
-### 4. Add it to your phone's home screen (recommended)
+This only needs to run once — it's a standalone script, not part of the deployed app.
+
+### 5. Add it to your phone's home screen (recommended)
 
 The site works in any mobile browser as-is, but adding it to your home screen gives you a
 one-tap app icon with no browser address bar, so logging an expense is as fast as opening any
@@ -84,14 +90,13 @@ other app:
 - **iPhone (Safari):** open the live site → tap the Share icon → **Add to Home Screen**.
 - **Android (Chrome):** open the live site → tap the ⋮ menu → **Add to Home screen** / **Install app**.
 
-You only need to do this once. After that, the connection URL and PIN you set up stay saved on
-that phone, so opening the icon takes you straight to your dashboard.
-
-### Updating the script later
-
-If you ever change `apps-script/Code.gs` in this repo, copy the updated code into the Apps Script editor for your sheet, then **Deploy → Manage deployments → edit (pencil icon) → New version → Deploy**. The Web App URL stays the same.
+You only need to do this once. After that, your Google sign-in session stays saved on that
+phone, so opening the icon takes you straight to your dashboard.
 
 ## Local development
+
+Copy `.env.example` to `.env.local` and fill in your Supabase project URL + anon key (see
+setup above), then:
 
 ```bash
 npm install
@@ -108,5 +113,5 @@ Pushing to `main` automatically builds and deploys the site to GitHub Pages via
 
 - React + Vite
 - react-router-dom (HashRouter, for GitHub Pages compatibility)
-- Recharts (pie chart + bar charts)
-- Google Apps Script + Google Sheets (data storage, no external database)
+- Recharts (pie chart, bar charts, line chart)
+- Supabase (Postgres + Auth) — Google sign-in, row-level security for per-user data isolation

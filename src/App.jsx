@@ -1,5 +1,6 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
-import { DataProvider, useData } from './context/DataContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { DataProvider } from './context/DataContext';
 import NavBar from './components/NavBar';
 import LockScreen from './components/LockScreen';
 import Dashboard from './pages/Dashboard';
@@ -14,12 +15,6 @@ import Settings from './pages/Settings';
 import './App.css';
 
 function AppShell() {
-  const { locked } = useData();
-
-  if (locked) {
-    return <LockScreen />;
-  }
-
   return (
     <>
       <NavBar />
@@ -40,12 +35,34 @@ function AppShell() {
   );
 }
 
+function Gate() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="page">
+        <p className="muted loading-pulse">Loading…</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LockScreen />;
+  }
+
+  return (
+    <DataProvider>
+      <AppShell />
+    </DataProvider>
+  );
+}
+
 export default function App() {
   return (
     <HashRouter>
-      <DataProvider>
-        <AppShell />
-      </DataProvider>
+      <AuthProvider>
+        <Gate />
+      </AuthProvider>
     </HashRouter>
   );
 }

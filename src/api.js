@@ -91,4 +91,8 @@ export const api = {
 
   addNote: (note) => post('addNote', note),
   deleteNote: (id) => post('deleteNote', { id }),
+
+  addHabit: (habit) => post('addHabit', habit),
+  deleteHabit: (id) => post('deleteHabit', { id }),
+  toggleHabitLog: (habitId, date, done) => post('toggleHabitLog', { habitId, date, done }),
 };

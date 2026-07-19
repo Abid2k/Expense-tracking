@@ -11,6 +11,8 @@ export function DataProvider({ children }) {
   const [debtPayments, setDebtPayments] = useState([]);
   const [todos, setTodos] = useState([]);
   const [notes, setNotes] = useState([]);
+  const [habits, setHabits] = useState([]);
+  const [habitLogs, setHabitLogs] = useState([]);
   const [settings, setSettings] = useState({});
   const [role, setRole] = useState(getRole());
   const [loading, setLoading] = useState(true);
@@ -26,6 +28,8 @@ export function DataProvider({ children }) {
     setDebtPayments(data.debtPayments || []);
     setTodos(data.todos || []);
     setNotes(data.notes || []);
+    setHabits(data.habits || []);
+    setHabitLogs(data.habitLogs || []);
     setSettings(data.settings || {});
     setRole(data.role || '');
   };
@@ -88,6 +92,8 @@ export function DataProvider({ children }) {
     debtPayments,
     todos,
     notes,
+    habits,
+    habitLogs,
     settings,
     role,
     isOwner: role === 'owner',
@@ -123,6 +129,10 @@ export function DataProvider({ children }) {
 
     addNote: wrap(api.addNote),
     deleteNote: wrap(api.deleteNote),
+
+    addHabit: wrap(api.addHabit),
+    deleteHabit: wrap(api.deleteHabit),
+    toggleHabitLog: wrap(api.toggleHabitLog),
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

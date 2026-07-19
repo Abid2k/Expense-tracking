@@ -10,6 +10,7 @@ const links = [
   { to: '/savings', label: 'Savings' },
   { to: '/debts', label: 'Debts' },
   { to: '/todos', label: 'To-Do' },
+  { to: '/habits', label: 'Habits' },
   { to: '/notes', label: 'Notes' },
   { to: '/reports', label: 'Reports' },
   { to: '/settings', label: 'Settings' },

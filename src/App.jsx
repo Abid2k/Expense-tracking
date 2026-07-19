@@ -7,6 +7,7 @@ import Expenses from './pages/Expenses';
 import Savings from './pages/Savings';
 import Debts from './pages/Debts';
 import Todos from './pages/Todos';
+import Habits from './pages/Habits';
 import Notes from './pages/Notes';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
@@ -29,6 +30,7 @@ function AppShell() {
           <Route path="/savings" element={<Savings />} />
           <Route path="/debts" element={<Debts />} />
           <Route path="/todos" element={<Todos />} />
+          <Route path="/habits" element={<Habits />} />
           <Route path="/notes" element={<Notes />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />

@@ -23,6 +23,8 @@ var DEBTS_SHEET = 'Debts';
 var DEBT_PAYMENTS_SHEET = 'DebtPayments';
 var TODOS_SHEET = 'Todos';
 var NOTES_SHEET = 'Notes';
+var HABITS_SHEET = 'Habits';
+var HABIT_LOGS_SHEET = 'HabitLogs';
 
 function getSpreadsheet_() {
   return SpreadsheetApp.getActiveSpreadsheet();
@@ -111,6 +113,8 @@ function ensureSheets_() {
   getOrCreateSheet_(DEBT_PAYMENTS_SHEET, ['ID', 'DebtID', 'Date', 'Amount', 'Note']);
   getOrCreateSheet_(TODOS_SHEET, ['ID', 'Month', 'Text', 'Done', 'Date']);
   getOrCreateSheet_(NOTES_SHEET, ['ID', 'Date', 'Title', 'Content']);
+  getOrCreateSheet_(HABITS_SHEET, ['ID', 'Name', 'Date']);
+  getOrCreateSheet_(HABIT_LOGS_SHEET, ['ID', 'HabitID', 'Date']);
 
   var settings = getOrCreateSheet_(SETTINGS_SHEET, ['Key', 'Value']);
   var data = settings.getDataRange().getValues();
@@ -243,6 +247,8 @@ function doGet(e) {
     debtPayments: sheetToObjects_(getOrCreateSheet_(DEBT_PAYMENTS_SHEET, [])),
     todos: sheetToObjects_(getOrCreateSheet_(TODOS_SHEET, [])),
     notes: sheetToObjects_(getOrCreateSheet_(NOTES_SHEET, [])),
+    habits: sheetToObjects_(getOrCreateSheet_(HABITS_SHEET, [])),
+    habitLogs: sheetToObjects_(getOrCreateSheet_(HABIT_LOGS_SHEET, [])),
     settings: getSettings_(),
   });
 }
@@ -293,6 +299,10 @@ function doPost(e) {
 
     if (action === 'addNote') return addNote_(body);
     if (action === 'deleteNote') return deleteRowById_(NOTES_SHEET, body.id);
+
+    if (action === 'addHabit') return addHabit_(body);
+    if (action === 'deleteHabit') return deleteHabit_(body);
+    if (action === 'toggleHabitLog') return toggleHabitLog_(body);
 
     return jsonOutput_({ ok: false, error: 'Unknown action: ' + action });
   } catch (err) {
@@ -486,6 +496,61 @@ function addNote_(body) {
     Content: body.content || '',
   });
   return jsonOutput_({ ok: true, id: id });
+}
+
+// ---- Habits ----
+// A Habit is a recurring daily checklist item (e.g. "Read 5 pages"). HabitLogs
+// only stores a row when a habit is marked done for a given day — no row means
+// not done, so toggling off just deletes the row instead of tracking a flag.
+
+function addHabit_(body) {
+  var sheet = getOrCreateSheet_(HABITS_SHEET, ['ID', 'Name', 'Date']);
+  var id = Utilities.getUuid();
+  appendRowByHeaders_(sheet, {
+    ID: id,
+    Name: body.name,
+    Date: new Date(),
+  });
+  return jsonOutput_({ ok: true, id: id });
+}
+
+function deleteHabit_(body) {
+  deleteRowById_(HABITS_SHEET, body.id);
+  var logsSheet = getOrCreateSheet_(HABIT_LOGS_SHEET, ['ID', 'HabitID', 'Date']);
+  var habitIdCol = getHeaders_(logsSheet).indexOf('HabitID');
+  var values = logsSheet.getDataRange().getValues();
+  for (var i = values.length - 1; i >= 1; i--) {
+    if (values[i][habitIdCol] === body.id) logsSheet.deleteRow(i + 1);
+  }
+  return jsonOutput_({ ok: true });
+}
+
+function toggleHabitLog_(body) {
+  var sheet = getOrCreateSheet_(HABIT_LOGS_SHEET, ['ID', 'HabitID', 'Date']);
+  var headers = getHeaders_(sheet);
+  var habitIdCol = headers.indexOf('HabitID');
+  var dateCol = headers.indexOf('Date');
+  var values = sheet.getDataRange().getValues();
+  var existingRow = -1;
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][habitIdCol] === body.habitId && toDateStr_(values[i][dateCol]) === body.date) {
+      existingRow = i + 1;
+      break;
+    }
+  }
+
+  if (body.done) {
+    if (existingRow === -1) {
+      appendRowByHeaders_(sheet, { ID: Utilities.getUuid(), HabitID: body.habitId, Date: body.date });
+    }
+  } else if (existingRow !== -1) {
+    sheet.deleteRow(existingRow);
+  }
+  return jsonOutput_({ ok: true });
+}
+
+function toDateStr_(value) {
+  return formatCellValue_(value);
 }
 
 // ---- Shared ----

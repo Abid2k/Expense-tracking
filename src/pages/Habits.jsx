@@ -1,19 +1,40 @@
 import { useMemo, useState } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useData } from '../context/DataContext';
-import { toDateStr, todayStr } from '../utils/format';
+import { useIsMobile } from '../hooks/useIsMobile';
+import { toDateStr, todayStr, currentMonthKey, monthLabel, daysInMonth } from '../utils/format';
 
 export default function Habits() {
   const { habits, habitLogs, addHabit, deleteHabit, toggleHabitLog, isOwner, loading, configured } = useData();
-  const [date, setDate] = useState(todayStr());
+  const isMobile = useIsMobile();
+  const [monthKey, setMonthKey] = useState(currentMonthKey());
   const [name, setName] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const doneHabitIds = useMemo(
-    () => new Set(habitLogs.filter((l) => toDateStr(l.Date) === date).map((l) => l.HabitID)),
-    [habitLogs, date]
+  const days = useMemo(
+    () => Array.from({ length: daysInMonth(monthKey) }, (_, i) => i + 1),
+    [monthKey]
   );
 
-  const doneCount = habits.filter((h) => doneHabitIds.has(h.ID)).length;
+  function dateForDay(day) {
+    return `${monthKey}-${String(day).padStart(2, '0')}`;
+  }
+
+  const doneSet = useMemo(() => {
+    const set = new Set();
+    habitLogs.forEach((l) => {
+      const d = toDateStr(l.Date);
+      if (d.startsWith(monthKey)) set.add(`${l.HabitID}|${d}`);
+    });
+    return set;
+  }, [habitLogs, monthKey]);
+
+  const today = todayStr();
+
+  const progressData = habits.map((h) => {
+    const doneDays = days.filter((d) => doneSet.has(`${h.ID}|${dateForDay(d)}`)).length;
+    return { name: h.Name, pct: Math.round((doneDays / days.length) * 100) };
+  });
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -41,17 +62,16 @@ export default function Habits() {
       <div className="page-header">
         <h1>Daily Habits</h1>
         <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
+          type="month"
+          value={monthKey}
+          onChange={(e) => setMonthKey(e.target.value)}
           style={{ width: 'auto' }}
         />
       </div>
 
       <div className="card">
         <div className="page-header">
-          <h2 style={{ margin: 0 }}>{date === todayStr() ? 'Today' : date}</h2>
-          <span className="muted">{doneCount} / {habits.length} done</span>
+          <h2 style={{ margin: 0 }}>{monthLabel(monthKey)}</h2>
         </div>
 
         {isOwner && (
@@ -71,27 +91,64 @@ export default function Habits() {
         ) : habits.length === 0 ? (
           <p className="muted">No habits yet. Add one above to start tracking.</p>
         ) : (
-          <ul className="checklist">
-            {habits.map((h) => {
-              const isDone = doneHabitIds.has(h.ID);
-              return (
-                <li key={h.ID} className={isDone ? 'checklist-item done' : 'checklist-item'}>
-                  <input
-                    type="checkbox"
-                    checked={isDone}
-                    disabled={!isOwner}
-                    onChange={(e) => toggleHabitLog(h.ID, date, e.target.checked)}
-                  />
-                  <span className="item-text">{h.Name}</span>
-                  {isOwner && (
-                    <button className="danger small" onClick={() => deleteHabit(h.ID)}>Delete</button>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+          <div className="habit-grid-wrap">
+            <table className="habit-grid">
+              <thead>
+                <tr>
+                  <th className="habit-grid-name">Habit</th>
+                  {days.map((d) => (
+                    <th key={d}>{d}</th>
+                  ))}
+                  {isOwner && <th />}
+                </tr>
+              </thead>
+              <tbody>
+                {habits.map((h) => (
+                  <tr key={h.ID}>
+                    <td className="habit-grid-name">{h.Name}</td>
+                    {days.map((d) => {
+                      const dateStr = dateForDay(d);
+                      const isDone = doneSet.has(`${h.ID}|${dateStr}`);
+                      const isFuture = dateStr > today;
+                      return (
+                        <td key={d}>
+                          <button
+                            type="button"
+                            className={isDone ? 'habit-dot done' : 'habit-dot'}
+                            disabled={!isOwner || isFuture}
+                            aria-label={`${h.Name} on ${dateStr}`}
+                            onClick={() => toggleHabitLog(h.ID, dateStr, !isDone)}
+                          />
+                        </td>
+                      );
+                    })}
+                    {isOwner && (
+                      <td>
+                        <button className="danger small" onClick={() => deleteHabit(h.ID)}>Delete</button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
+
+      {habits.length > 0 && (
+        <div className="card">
+          <h2>{monthLabel(monthKey)} Progress</h2>
+          <ResponsiveContainer width="100%" height={isMobile ? 220 : 280}>
+            <LineChart data={progressData} margin={{ right: 8 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} width={40} tickFormatter={(v) => `${v}%`} />
+              <Tooltip formatter={(value) => `${value}%`} />
+              <Line type="monotone" dataKey="pct" stroke="#3b82f6" strokeWidth={2} name="Days completed" dot={{ r: 4 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }

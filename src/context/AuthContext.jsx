@@ -29,6 +29,10 @@ export function AuthProvider({ children }) {
       options: { redirectTo: window.location.origin + import.meta.env.BASE_URL },
     }),
     signOut: () => supabase.auth.signOut(),
+    updateDisplayName: async (name) => {
+      const { error } = await supabase.auth.updateUser({ data: { display_name: name } });
+      if (error) throw error;
+    },
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

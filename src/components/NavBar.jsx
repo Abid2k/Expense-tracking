@@ -24,7 +24,7 @@ export default function NavBar() {
 
   const roleControls = user && (
     <>
-      <span className="role-badge">{user.email}</span>
+      <span className="role-badge">{user.user_metadata?.display_name || user.email}</span>
       <button
         className="secondary small"
         onClick={() => {

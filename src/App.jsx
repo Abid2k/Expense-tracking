@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 import NavBar from './components/NavBar';
 import LockScreen from './components/LockScreen';
+import ProfileSetup from './components/ProfileSetup';
 import Dashboard from './pages/Dashboard';
 import Expenses from './pages/Expenses';
 import Savings from './pages/Savings';
@@ -48,6 +49,10 @@ function Gate() {
 
   if (!user) {
     return <LockScreen />;
+  }
+
+  if (!user.user_metadata?.display_name) {
+    return <ProfileSetup />;
   }
 
   return (

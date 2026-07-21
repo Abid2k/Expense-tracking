@@ -2,12 +2,14 @@ import { useMemo, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useData } from '../context/DataContext';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useCurrencyFormat } from '../hooks/useCurrencyFormat';
 import { CATEGORIES, CATEGORY_COLORS } from '../constants';
-import { formatSAR, toMonthKey, monthLabel, currentMonthKey, previousMonthKey } from '../utils/format';
+import { toMonthKey, monthLabel, currentMonthKey, previousMonthKey } from '../utils/format';
 
 export default function Reports() {
   const { expenses, configured } = useData();
   const isMobile = useIsMobile();
+  const formatCurrency = useCurrencyFormat();
 
   const months = useMemo(() => {
     const set = new Set(expenses.map((e) => toMonthKey(e.Date)));
@@ -76,7 +78,7 @@ export default function Reports() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={isMobile ? 'preserveStartEnd' : 0} />
               <YAxis tick={{ fontSize: 11 }} width={44} />
-              <Tooltip formatter={(value) => formatSAR(value)} />
+              <Tooltip formatter={(value) => formatCurrency(value)} />
               <Bar dataKey="total" fill="#3b82f6" name="Total Spent" />
             </BarChart>
           </ResponsiveContainer>
@@ -107,16 +109,16 @@ export default function Reports() {
         <div className="summary-grid">
           <div className="card summary-card">
             <span className="summary-label">{monthLabel(monthA)}</span>
-            <span className="summary-value">{formatSAR(sumA)}</span>
+            <span className="summary-value">{formatCurrency(sumA)}</span>
           </div>
           <div className="card summary-card">
             <span className="summary-label">{monthLabel(monthB)}</span>
-            <span className="summary-value">{formatSAR(sumB)}</span>
+            <span className="summary-value">{formatCurrency(sumB)}</span>
           </div>
           <div className="card summary-card">
             <span className="summary-label">Difference</span>
             <span className={diff > 0 ? 'summary-value error-text' : diff < 0 ? 'summary-value success-text' : 'summary-value'}>
-              {diff > 0 ? '+' : ''}{formatSAR(diff)}
+              {diff > 0 ? '+' : ''}{formatCurrency(diff)}
             </span>
             <span className="muted">{diffPct > 0 ? '+' : ''}{diffPct.toFixed(1)}%</span>
           </div>
@@ -131,7 +133,7 @@ export default function Reports() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={isMobile ? 'preserveStartEnd' : 0} />
                 <YAxis tick={{ fontSize: 11 }} width={44} />
-                <Tooltip formatter={(value) => formatSAR(value)} />
+                <Tooltip formatter={(value) => formatCurrency(value)} />
                 <Legend wrapperStyle={{ fontSize: 13 }} />
                 <Bar dataKey={monthLabel(monthA)} fill="#94a3b8" />
                 <Bar dataKey={monthLabel(monthB)} fill="#3b82f6" />
@@ -160,10 +162,10 @@ export default function Reports() {
                           {row.name}
                         </span>
                       </td>
-                      <td data-label={monthLabel(monthA)}>{formatSAR(a)}</td>
-                      <td data-label={monthLabel(monthB)}>{formatSAR(b)}</td>
+                      <td data-label={monthLabel(monthA)}>{formatCurrency(a)}</td>
+                      <td data-label={monthLabel(monthB)}>{formatCurrency(b)}</td>
                       <td data-label="Difference" className={d > 0 ? 'error-text' : d < 0 ? 'success-text' : ''}>
-                        {d > 0 ? '+' : ''}{formatSAR(d)}
+                        {d > 0 ? '+' : ''}{formatCurrency(d)}
                       </td>
                     </tr>
                   );

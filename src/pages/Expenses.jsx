@@ -1,10 +1,14 @@
 import { useMemo, useState } from 'react';
 import { useData } from '../context/DataContext';
+import { useCurrency } from '../hooks/useCurrency';
+import { useCurrencyFormat } from '../hooks/useCurrencyFormat';
 import { CATEGORIES } from '../constants';
-import { formatSAR, toMonthKey, toDateStr, monthLabel, currentMonthKey, todayStr } from '../utils/format';
+import { toMonthKey, toDateStr, monthLabel, currentMonthKey, todayStr } from '../utils/format';
 
 export default function Expenses() {
   const { expenses, addExpense, deleteExpense, loading, configured } = useData();
+  const currency = useCurrency();
+  const formatCurrency = useCurrencyFormat();
   const [monthKey, setMonthKey] = useState(currentMonthKey());
   const [form, setForm] = useState({ date: todayStr(), category: CATEGORIES[0], amount: '', note: '' });
   const [saving, setSaving] = useState(false);
@@ -87,7 +91,7 @@ export default function Expenses() {
             </select>
           </div>
           <div>
-            <label htmlFor="exp-amount">Amount (SAR)</label>
+            <label htmlFor="exp-amount">Amount ({currency})</label>
             <input
               id="exp-amount"
               type="number"
@@ -122,7 +126,7 @@ export default function Expenses() {
             ))}
           </select>
         </div>
-        <p className="muted">Total for {monthLabel(monthKey)}: <strong>{formatSAR(monthTotal)}</strong></p>
+        <p className="muted">Total for {monthLabel(monthKey)}: <strong>{formatCurrency(monthTotal)}</strong></p>
 
         {loading ? (
           <p className="muted loading-pulse">Loading…</p>
@@ -145,7 +149,7 @@ export default function Expenses() {
                   <td data-label="Date">{toDateStr(e.Date)}</td>
                   <td data-label="Category">{e.Category}</td>
                   <td data-label="Note">{e.Note}</td>
-                  <td data-label="Amount">{formatSAR(e.Amount)}</td>
+                  <td data-label="Amount">{formatCurrency(e.Amount)}</td>
                   <td data-label="">
                     <button className="danger small" onClick={() => handleDelete(e.ID)}>Delete</button>
                   </td>

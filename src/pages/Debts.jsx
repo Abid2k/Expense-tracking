@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useData } from '../context/DataContext';
+import { useCurrency } from '../hooks/useCurrency';
+import { useCurrencyFormat } from '../hooks/useCurrencyFormat';
 import { DEBT_TYPES } from '../constants';
-import { formatSAR, toDateStr, todayStr } from '../utils/format';
+import { toDateStr, todayStr } from '../utils/format';
 
 function isDebtPaid(debt) {
   return debt.Paid === true || debt.Paid === 'TRUE';
@@ -13,7 +15,7 @@ function debtRemaining(debt, payments) {
   return Math.max(0, Number(debt.Amount) - paid);
 }
 
-function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete, onTogglePaid, onUpdate }) {
+function DebtCard({ debt, payments, isOwner, currency, formatCurrency, onAddPayment, onDelete, onTogglePaid, onUpdate }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ date: todayStr(), amount: '', note: '' });
   const [saving, setSaving] = useState(false);
@@ -92,7 +94,7 @@ function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete, onTogglePai
             </select>
           </div>
           <div>
-            <label>Amount (SAR)</label>
+            <label>Amount ({currency})</label>
             <input type="number" step="0.01" min="0" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} />
           </div>
           <div>
@@ -131,8 +133,8 @@ function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete, onTogglePai
         <div className="progress-fill" style={{ width: `${pct}%` }} />
       </div>
       <p className="muted">
-        {formatSAR(paidAmount)} of {formatSAR(amount)} {isOwed ? 'received' : 'paid'} ({pct.toFixed(0)}%)
-        {' — '}{formatSAR(remaining)} remaining
+        {formatCurrency(paidAmount)} of {formatCurrency(amount)} {isOwed ? 'received' : 'paid'} ({pct.toFixed(0)}%)
+        {' — '}{formatCurrency(remaining)} remaining
       </p>
       {debt.Note && <p className="muted">{debt.Note}</p>}
 
@@ -158,7 +160,7 @@ function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete, onTogglePai
                 <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
               </div>
               <div>
-                <label>Amount (SAR)</label>
+                <label>Amount ({currency})</label>
                 <input type="number" step="0.01" min="0" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
               </div>
               <div>
@@ -185,7 +187,7 @@ function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete, onTogglePai
               <tr key={p.ID}>
                 <td data-label="Date">{toDateStr(p.Date)}</td>
                 <td data-label="Note">{p.Note}</td>
-                <td data-label="Amount">{formatSAR(p.Amount)}</td>
+                <td data-label="Amount">{formatCurrency(p.Amount)}</td>
               </tr>
             ))}
           </tbody>
@@ -197,6 +199,8 @@ function DebtCard({ debt, payments, isOwner, onAddPayment, onDelete, onTogglePai
 
 export default function Debts() {
   const { debts, debtPayments, addDebt, updateDebt, deleteDebt, addDebtPayment, toggleDebtPaid, isOwner, loading, configured } = useData();
+  const currency = useCurrency();
+  const formatCurrency = useCurrencyFormat();
   const [form, setForm] = useState({ name: '', type: DEBT_TYPES[0], amount: '', note: '', date: todayStr() });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
@@ -253,11 +257,11 @@ export default function Debts() {
       <div className="summary-grid">
         <div className="card summary-card">
           <span className="summary-label">Total I Owe</span>
-          <span className="summary-value error-text">{formatSAR(totalOwed)}</span>
+          <span className="summary-value error-text">{formatCurrency(totalOwed)}</span>
         </div>
         <div className="card summary-card">
           <span className="summary-label">Total Owed to Me</span>
-          <span className="summary-value success-text">{formatSAR(totalOwedToMe)}</span>
+          <span className="summary-value success-text">{formatCurrency(totalOwedToMe)}</span>
         </div>
       </div>
 
@@ -276,7 +280,7 @@ export default function Debts() {
               </select>
             </div>
             <div>
-              <label>Amount (SAR)</label>
+              <label>Amount ({currency})</label>
               <input type="number" step="0.01" min="0" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
             </div>
             <div>
@@ -304,6 +308,8 @@ export default function Debts() {
             debt={debt}
             payments={paymentsByDebt[debt.ID] || []}
             isOwner={isOwner}
+            currency={currency}
+            formatCurrency={formatCurrency}
             onAddPayment={(debtId, payment) => addDebtPayment({ debtId, ...payment })}
             onDelete={deleteDebt}
             onTogglePaid={toggleDebtPaid}

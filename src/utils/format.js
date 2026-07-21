@@ -1,6 +1,11 @@
-export function formatSAR(amount) {
+import { DEFAULT_CURRENCY } from '../constants';
+
+export function formatCurrency(amount, currency = DEFAULT_CURRENCY) {
   const value = Number(amount) || 0;
-  return `${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SAR`;
+  // Fraction digits vary by currency (JPY/KRW use 0, KWD/BHD/OMR use 3) — ask
+  // Intl for the correct count instead of hardcoding 2 for every currency.
+  const digits = new Intl.NumberFormat('en-US', { style: 'currency', currency }).resolvedOptions().maximumFractionDigits;
+  return `${value.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits })} ${currency}`;
 }
 
 export function toMonthKey(dateStr) {

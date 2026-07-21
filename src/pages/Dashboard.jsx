@@ -6,8 +6,9 @@ import {
 } from 'recharts';
 import { useData } from '../context/DataContext';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useCurrencyFormat } from '../hooks/useCurrencyFormat';
 import { CATEGORY_COLORS } from '../constants';
-import { formatSAR, toMonthKey, toDateStr, monthLabel, currentMonthKey, daysInMonth } from '../utils/format';
+import { toMonthKey, toDateStr, monthLabel, currentMonthKey, daysInMonth } from '../utils/format';
 
 function isDebtPaid(debt) {
   return debt.Paid === true || debt.Paid === 'TRUE';
@@ -17,6 +18,7 @@ export default function Dashboard() {
   const { expenses, savings, goals, debts, debtPayments, todos, loading, configured, error } = useData();
   const [monthKey, setMonthKey] = useState(currentMonthKey());
   const isMobile = useIsMobile();
+  const formatCurrency = useCurrencyFormat();
 
   const months = useMemo(() => {
     const set = new Set(expenses.map((e) => toMonthKey(e.Date)));
@@ -129,12 +131,12 @@ export default function Dashboard() {
       <div className="summary-grid">
         <div className="card summary-card">
           <span className="summary-label">Total Spent — {monthLabel(monthKey)}</span>
-          <span className="summary-value">{formatSAR(total)}</span>
+          <span className="summary-value">{formatCurrency(total)}</span>
         </div>
         <div className="card summary-card">
           <span className="summary-label">Top Category</span>
           <span className="summary-value">{topCategory ? topCategory.name : '—'}</span>
-          <span className="muted">{topCategory ? formatSAR(topCategory.value) : ''}</span>
+          <span className="muted">{topCategory ? formatCurrency(topCategory.value) : ''}</span>
         </div>
         <div className="card summary-card">
           <span className="summary-label">Savings Progress</span>
@@ -145,7 +147,7 @@ export default function Dashboard() {
         </div>
         <div className="card summary-card">
           <span className="summary-label">Debt Outstanding</span>
-          <span className="summary-value error-text">{formatSAR(debtOutstanding)}</span>
+          <span className="summary-value error-text">{formatCurrency(debtOutstanding)}</span>
         </div>
       </div>
 
@@ -153,11 +155,11 @@ export default function Dashboard() {
         <div className="summary-grid">
           <div className="card summary-card">
             <span className="summary-label">Average Daily Spend</span>
-            <span className="summary-value">{formatSAR(avgDaily)}</span>
+            <span className="summary-value">{formatCurrency(avgDaily)}</span>
           </div>
           <div className="card summary-card">
             <span className="summary-label">Projected Month Total</span>
-            <span className="summary-value">{formatSAR(projected)}</span>
+            <span className="summary-value">{formatCurrency(projected)}</span>
           </div>
           <div className="card summary-card">
             <span className="summary-label">Days Left This Month</span>
@@ -176,7 +178,7 @@ export default function Dashboard() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="day" tick={{ fontSize: 11 }} interval={isMobile ? 4 : 1} />
               <YAxis tick={{ fontSize: 11 }} width={44} />
-              <Tooltip formatter={(value) => formatSAR(value)} labelFormatter={(day) => `Day ${day}`} />
+              <Tooltip formatter={(value) => formatCurrency(value)} labelFormatter={(day) => `Day ${day}`} />
               <Area type="monotone" dataKey="total" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.25} name="Spent" />
             </AreaChart>
           </ResponsiveContainer>
@@ -203,7 +205,7 @@ export default function Dashboard() {
                   <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name] || '#999'} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value) => formatSAR(value)} />
+              <Tooltip formatter={(value) => formatCurrency(value)} />
               <Legend wrapperStyle={{ fontSize: 13 }} />
             </PieChart>
           </ResponsiveContainer>
@@ -249,7 +251,7 @@ export default function Dashboard() {
             debtsWithRemaining.slice(0, 4).map((d) => (
               <div key={d.ID} className="page-header" style={{ marginBottom: 6 }}>
                 <span>{d.Name}</span>
-                <span className="error-text">{formatSAR(d.remaining)}</span>
+                <span className="error-text">{formatCurrency(d.remaining)}</span>
               </div>
             ))
           )}

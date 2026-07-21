@@ -3,6 +3,11 @@ import { supabase } from '../lib/supabaseClient';
 
 const AuthContext = createContext(null);
 
+export function isProfileComplete(user) {
+  const meta = user?.user_metadata;
+  return Boolean(meta?.display_name && meta?.country && meta?.currency);
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,8 +34,8 @@ export function AuthProvider({ children }) {
       options: { redirectTo: window.location.origin + import.meta.env.BASE_URL },
     }),
     signOut: () => supabase.auth.signOut(),
-    updateDisplayName: async (name) => {
-      const { error } = await supabase.auth.updateUser({ data: { display_name: name } });
+    updateProfile: async (fields) => {
+      const { error } = await supabase.auth.updateUser({ data: fields });
       if (error) throw error;
     },
   };

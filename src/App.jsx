@@ -1,5 +1,5 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider, useAuth, isProfileComplete } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 import NavBar from './components/NavBar';
 import LockScreen from './components/LockScreen';
@@ -51,7 +51,7 @@ function Gate() {
     return <LockScreen />;
   }
 
-  if (!user.user_metadata?.display_name) {
+  if (!isProfileComplete(user)) {
     return <ProfileSetup />;
   }
 

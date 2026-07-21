@@ -9,7 +9,8 @@ Live site: https://Abid2k.github.io/Expense-tracking/
 
 ## Features
 
-- Add expenses with date, category, amount (SAR) and notes
+- Add expenses with date, category, amount (in your own currency) and notes
+- Pick your name, country, and currency on first sign-in — every amount in the app displays in your chosen currency
 - Dashboard with a category pie chart, a daily spending trend chart, smart stats (average daily spend, projected month total, days left), and at-a-glance widgets for savings goals, debts, and this month's to-dos
 - Savings: create multiple goals (e.g. "Monthly Savings", "Vacation 2027"), tagged Monthly/Yearly/One-time/General/Custom. Leave the target amount blank for open-ended savings with no specific goal — just a running total. Add an optional target date to see the monthly contribution needed to hit it on time. Edit any goal later if you make a mistake
 - Debts: track things you owe or are owed; either log payments gradually and watch the progress bar, or just tick "Mark as Paid" to close one out instantly. Edit any debt later if you make a mistake

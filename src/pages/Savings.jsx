@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useData } from '../context/DataContext';
+import { useCurrency } from '../hooks/useCurrency';
+import { useCurrencyFormat } from '../hooks/useCurrencyFormat';
 import { GOAL_TYPES } from '../constants';
-import { formatSAR, toDateStr, todayStr, monthsUntil } from '../utils/format';
+import { toDateStr, todayStr, monthsUntil } from '../utils/format';
 
-function GoalCard({ goal, contributions, isOwner, onAddContribution, onDelete, onUpdate }) {
+function GoalCard({ goal, contributions, isOwner, currency, formatCurrency, onAddContribution, onDelete, onUpdate }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ date: todayStr(), amount: '', note: '' });
   const [saving, setSaving] = useState(false);
@@ -89,7 +91,7 @@ function GoalCard({ goal, contributions, isOwner, onAddContribution, onDelete, o
             </select>
           </div>
           <div>
-            <label>Target Amount (optional)</label>
+            <label>Target Amount ({currency}, optional)</label>
             <input type="number" step="0.01" min="0" value={editForm.targetAmount} onChange={(e) => setEditForm({ ...editForm, targetAmount: e.target.value })} />
           </div>
           <div>
@@ -130,18 +132,18 @@ function GoalCard({ goal, contributions, isOwner, onAddContribution, onDelete, o
             <div className="progress-fill" style={{ width: `${pct}%` }} />
           </div>
           <p className="muted">
-            {formatSAR(saved)} of {formatSAR(target)} saved ({pct.toFixed(0)}%)
-            {` — ${formatSAR(remaining)} to go`}
+            {formatCurrency(saved)} of {formatCurrency(target)} saved ({pct.toFixed(0)}%)
+            {` — ${formatCurrency(remaining)} to go`}
           </p>
           {goal.TargetDate && (
             <p className="muted">
               Target date: {goal.TargetDate}
-              {requiredMonthly > 0 && ` — need ~${formatSAR(requiredMonthly)}/month to reach this on time`}
+              {requiredMonthly > 0 && ` — need ~${formatCurrency(requiredMonthly)}/month to reach this on time`}
             </p>
           )}
         </>
       ) : (
-        <p className="summary-value success-text" style={{ fontSize: 22 }}>{formatSAR(saved)} saved</p>
+        <p className="summary-value success-text" style={{ fontSize: 22 }}>{formatCurrency(saved)} saved</p>
       )}
       {goal.Note && <p className="muted">{goal.Note}</p>}
 
@@ -156,7 +158,7 @@ function GoalCard({ goal, contributions, isOwner, onAddContribution, onDelete, o
                 <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
               </div>
               <div>
-                <label>Amount (SAR)</label>
+                <label>Amount ({currency})</label>
                 <input type="number" step="0.01" min="0" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
               </div>
               <div>
@@ -183,7 +185,7 @@ function GoalCard({ goal, contributions, isOwner, onAddContribution, onDelete, o
               <tr key={c.ID}>
                 <td data-label="Date">{toDateStr(c.Date)}</td>
                 <td data-label="Note">{c.Note}</td>
-                <td data-label="Amount">{formatSAR(c.Amount)}</td>
+                <td data-label="Amount">{formatCurrency(c.Amount)}</td>
               </tr>
             ))}
           </tbody>
@@ -195,6 +197,8 @@ function GoalCard({ goal, contributions, isOwner, onAddContribution, onDelete, o
 
 export default function Savings() {
   const { goals, savings, addGoal, updateGoal, deleteGoal, addSaving, isOwner, loading, configured } = useData();
+  const currency = useCurrency();
+  const formatCurrency = useCurrencyFormat();
   const [form, setForm] = useState({ name: '', type: GOAL_TYPES[0], targetAmount: '', targetDate: '', note: '' });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
@@ -246,7 +250,7 @@ export default function Savings() {
       <div className="summary-grid">
         <div className="card summary-card">
           <span className="summary-label">Total Saved</span>
-          <span className="summary-value success-text">{formatSAR(totalSaved)}</span>
+          <span className="summary-value success-text">{formatCurrency(totalSaved)}</span>
         </div>
         <div className="card summary-card">
           <span className="summary-label">Overall Progress</span>
@@ -276,7 +280,7 @@ export default function Savings() {
               </select>
             </div>
             <div>
-              <label>Target Amount (optional)</label>
+              <label>Target Amount ({currency}, optional)</label>
               <input type="number" step="0.01" min="0" placeholder="Leave blank for no target" value={form.targetAmount} onChange={(e) => setForm({ ...form, targetAmount: e.target.value })} />
             </div>
             <div>
@@ -304,6 +308,8 @@ export default function Savings() {
             goal={goal}
             contributions={contributionsByGoal[goal.ID] || []}
             isOwner={isOwner}
+            currency={currency}
+            formatCurrency={formatCurrency}
             onAddContribution={(goalId, contribution) => addSaving({ goalId, ...contribution })}
             onDelete={deleteGoal}
             onUpdate={updateGoal}

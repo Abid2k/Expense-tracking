@@ -9,7 +9,7 @@
 
 create table expenses (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) default auth.uid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
   date date not null,
   category text not null,
   amount numeric(12,2) not null,
@@ -19,7 +19,7 @@ create table expenses (
 
 create table goals (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) default auth.uid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
   name text not null,
   type text not null, -- Monthly / Yearly / One-time / General / Custom
   target_amount numeric(12,2), -- null = open-ended goal, no target
@@ -32,7 +32,7 @@ create table goals (
 -- per-entry notes/dates survive.
 create table savings (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) default auth.uid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
   goal_id uuid not null references goals(id) on delete cascade,
   date date not null,
   amount numeric(12,2) not null,
@@ -42,7 +42,7 @@ create table savings (
 
 create table debts (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) default auth.uid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
   name text not null,
   type text not null, -- 'I Owe' / 'Owed to Me'
   amount numeric(12,2) not null,
@@ -55,7 +55,7 @@ create table debts (
 -- Debt payments — a ledger, same reasoning as savings.
 create table debt_payments (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) default auth.uid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
   debt_id uuid not null references debts(id) on delete cascade,
   date date not null,
   amount numeric(12,2) not null,
@@ -65,7 +65,7 @@ create table debt_payments (
 
 create table todos (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) default auth.uid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
   month text not null, -- 'YYYY-MM'
   text text not null,
   done boolean not null default false,
@@ -74,7 +74,7 @@ create table todos (
 
 create table notes (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) default auth.uid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
   date date,
   title text,
   content text,
@@ -83,7 +83,7 @@ create table notes (
 
 create table habits (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) default auth.uid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
   name text not null,
   created_at timestamptz not null default now()
 );
@@ -92,7 +92,7 @@ create table habits (
 -- flag needed. Unchecking a day deletes the row.
 create table habit_logs (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) default auth.uid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
   habit_id uuid not null references habits(id) on delete cascade,
   date date not null,
   created_at timestamptz not null default now(),

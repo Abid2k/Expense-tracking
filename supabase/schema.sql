@@ -17,6 +17,17 @@ create table expenses (
   created_at timestamptz not null default now()
 );
 
+-- Salary / income credits — a ledger, same reasoning as savings/debt_payments,
+-- so each credit's date and amount survive individually.
+create table income (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
+  date date not null,
+  amount numeric(12,2) not null,
+  note text,
+  created_at timestamptz not null default now()
+);
+
 create table goals (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
@@ -99,6 +110,7 @@ create table habit_logs (
   unique (habit_id, date)
 );
 
+create index on income (user_id, date desc);
 create index on expenses (user_id, date desc);
 create index on savings (user_id, goal_id);
 create index on debt_payments (user_id, debt_id);
@@ -109,6 +121,7 @@ create index on habit_logs (user_id, habit_id, date);
 -- Identical 4-policy set on every table: a user can select/insert/update/
 -- delete only rows where user_id matches their own auth.uid().
 
+alter table income enable row level security;
 alter table expenses enable row level security;
 alter table goals enable row level security;
 alter table savings enable row level security;
@@ -118,6 +131,11 @@ alter table todos enable row level security;
 alter table notes enable row level security;
 alter table habits enable row level security;
 alter table habit_logs enable row level security;
+
+create policy "select own" on income for select using (auth.uid() = user_id);
+create policy "insert own" on income for insert with check (auth.uid() = user_id);
+create policy "update own" on income for update using (auth.uid() = user_id);
+create policy "delete own" on income for delete using (auth.uid() = user_id);
 
 create policy "select own" on expenses for select using (auth.uid() = user_id);
 create policy "insert own" on expenses for insert with check (auth.uid() = user_id);

@@ -23,7 +23,8 @@ async function deleteRow(table, id) {
 
 export const api = {
   getAll: async () => {
-    const [expenses, goals, savings, debts, debtPayments, todos, notes, habits, habitLogs] = await Promise.all([
+    const [income, expenses, goals, savings, debts, debtPayments, todos, notes, habits, habitLogs] = await Promise.all([
+      selectAll('income'),
       selectAll('expenses'),
       selectAll('goals'),
       selectAll('savings'),
@@ -34,8 +35,15 @@ export const api = {
       selectAll('habits'),
       selectAll('habit_logs'),
     ]);
-    return { expenses, goals, savings, debts, debtPayments, todos, notes, habits, habitLogs };
+    return { income, expenses, goals, savings, debts, debtPayments, todos, notes, habits, habitLogs };
   },
+
+  addIncome: (income) => insertRow('income', {
+    date: income.date,
+    amount: Number(income.amount),
+    note: income.note || '',
+  }),
+  deleteIncome: (id) => deleteRow('income', id),
 
   addExpense: (expense) => insertRow('expenses', {
     date: expense.date,

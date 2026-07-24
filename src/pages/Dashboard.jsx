@@ -17,6 +17,7 @@ function isDebtPaid(debt) {
 export default function Dashboard() {
   const { expenses, savings, goals, debts, debtPayments, todos, loading, configured, error } = useData();
   const [monthKey, setMonthKey] = useState(currentMonthKey());
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const isMobile = useIsMobile();
   const formatCurrency = useCurrencyFormat();
 
@@ -44,6 +45,14 @@ export default function Dashboard() {
 
   const total = byCategory.reduce((sum, c) => sum + c.value, 0);
   const topCategory = byCategory[0];
+
+  const categoryItems = useMemo(
+    () =>
+      monthExpenses
+        .filter((e) => (e.Category || 'Other') === selectedCategory)
+        .sort((a, b) => (a.Date < b.Date ? 1 : -1)),
+    [monthExpenses, selectedCategory]
+  );
 
   const isCurrentMonth = monthKey === currentMonthKey();
   const totalDays = daysInMonth(monthKey);
@@ -118,7 +127,13 @@ export default function Dashboard() {
     <div className="page">
       <div className="page-header">
         <h1>Dashboard</h1>
-        <select value={monthKey} onChange={(e) => setMonthKey(e.target.value)}>
+        <select
+          value={monthKey}
+          onChange={(e) => {
+            setMonthKey(e.target.value);
+            setSelectedCategory(null);
+          }}
+        >
           {months.map((m) => (
             <option key={m} value={m}>{monthLabel(m)}</option>
           ))}
@@ -200,15 +215,53 @@ export default function Dashboard() {
                 cy="50%"
                 outerRadius={isMobile ? 85 : 130}
                 label={isMobile ? false : (entry) => `${entry.name} (${((entry.value / total) * 100).toFixed(0)}%)`}
+                onClick={(entry) => setSelectedCategory(entry.name)}
+                style={{ cursor: 'pointer' }}
               >
                 {byCategory.map((entry) => (
                   <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name] || '#999'} />
                 ))}
               </Pie>
               <Tooltip formatter={(value) => formatCurrency(value)} />
-              <Legend wrapperStyle={{ fontSize: 13 }} />
+              <Legend
+                wrapperStyle={{ fontSize: 13, cursor: 'pointer' }}
+                onClick={(entry) => setSelectedCategory(entry.value)}
+              />
             </PieChart>
           </ResponsiveContainer>
+        )}
+
+        {selectedCategory && (
+          <div style={{ marginTop: 16 }}>
+            <div className="page-header">
+              <h3 style={{ margin: 0 }}>
+                {selectedCategory} — {formatCurrency(categoryItems.reduce((sum, e) => sum + Number(e.Amount), 0))}
+              </h3>
+              <button className="secondary small" onClick={() => setSelectedCategory(null)}>Close</button>
+            </div>
+            {categoryItems.length === 0 ? (
+              <p className="muted">No expenses in this category.</p>
+            ) : (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Note</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categoryItems.map((e) => (
+                    <tr key={e.ID}>
+                      <td data-label="Date">{toDateStr(e.Date)}</td>
+                      <td data-label="Note">{e.Note}</td>
+                      <td data-label="Amount">{formatCurrency(e.Amount)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         )}
       </div>
 

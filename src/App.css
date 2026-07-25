@@ -220,6 +220,46 @@
   gap: 6px;
 }
 
+.category-breakdown {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-self: center;
+}
+
+.category-breakdown li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.category-breakdown li:hover,
+.category-breakdown li.active {
+  background: var(--border);
+}
+
+.category-breakdown .swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.category-breakdown-name {
+  flex: 1;
+}
+
+.category-breakdown-amount {
+  font-weight: 600;
+}
+
 .summary-label {
   font-size: 13px;
   color: var(--text);

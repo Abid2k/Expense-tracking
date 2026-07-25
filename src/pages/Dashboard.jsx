@@ -18,6 +18,7 @@ export default function Dashboard() {
   const { expenses, savings, goals, debts, debtPayments, todos, loading, configured, error } = useData();
   const [monthKey, setMonthKey] = useState(currentMonthKey());
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [hoveredCategory, setHoveredCategory] = useState(null);
   const isMobile = useIsMobile();
   const formatCurrency = useCurrencyFormat();
 
@@ -205,30 +206,55 @@ export default function Dashboard() {
         {byCategory.length === 0 ? (
           <p className="muted">No expenses recorded for {monthLabel(monthKey)}.</p>
         ) : (
-          <ResponsiveContainer width="100%" height={isMobile ? 300 : 360}>
-            <PieChart>
-              <Pie
-                data={byCategory}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={isMobile ? 85 : 130}
-                label={isMobile ? false : (entry) => `${entry.name} (${((entry.value / total) * 100).toFixed(0)}%)`}
-                onClick={(entry) => setSelectedCategory(entry.name)}
-                style={{ cursor: 'pointer' }}
-              >
-                {byCategory.map((entry) => (
-                  <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name] || '#999'} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => formatCurrency(value)} />
-              <Legend
-                wrapperStyle={{ fontSize: 13, cursor: 'pointer' }}
-                onClick={(entry) => setSelectedCategory(entry.value)}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+          <div className="overview-grid">
+            <ResponsiveContainer width="100%" height={isMobile ? 300 : 360}>
+              <PieChart>
+                <Pie
+                  data={byCategory}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={isMobile ? 85 : 130}
+                  label={isMobile ? false : (entry) => `${entry.name} (${((entry.value / total) * 100).toFixed(0)}%)`}
+                  onClick={(entry) => setSelectedCategory(entry.name)}
+                  onMouseEnter={(entry) => setHoveredCategory(entry.name)}
+                  onMouseLeave={() => setHoveredCategory(null)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {byCategory.map((entry) => (
+                    <Cell
+                      key={entry.name}
+                      fill={CATEGORY_COLORS[entry.name] || '#999'}
+                      opacity={hoveredCategory && hoveredCategory !== entry.name ? 0.5 : 1}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => formatCurrency(value)} />
+                <Legend
+                  wrapperStyle={{ fontSize: 13, cursor: 'pointer' }}
+                  onClick={(entry) => setSelectedCategory(entry.value)}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+
+            <ul className="category-breakdown">
+              {byCategory.map((c) => (
+                <li
+                  key={c.name}
+                  className={c.name === hoveredCategory ? 'active' : ''}
+                  onMouseEnter={() => setHoveredCategory(c.name)}
+                  onMouseLeave={() => setHoveredCategory(null)}
+                  onClick={() => setSelectedCategory(c.name)}
+                >
+                  <span className="swatch" style={{ background: CATEGORY_COLORS[c.name] || '#999' }} />
+                  <span className="category-breakdown-name">{c.name}</span>
+                  <span className="muted">{((c.value / total) * 100).toFixed(0)}%</span>
+                  <span className="category-breakdown-amount">{formatCurrency(c.value)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
 
         {selectedCategory && (

@@ -11,6 +11,12 @@ async function insertRow(table, row) {
   if (error) throw error;
 }
 
+async function insertRowReturning(table, row) {
+  const { data, error } = await supabase.from(table).insert(row).select().single();
+  if (error) throw error;
+  return data;
+}
+
 async function updateRow(table, id, fields) {
   const { error } = await supabase.from(table).update(fields).eq('id', id);
   if (error) throw error;
@@ -94,12 +100,29 @@ export const api = {
   }),
   deleteDebt: (id) => deleteRow('debts', id), // debt_payments cascade via FK
   toggleDebtPaid: (id, paid) => updateRow('debts', id, { paid: Boolean(paid) }),
-  addDebtPayment: (payment) => insertRow('debt_payments', {
-    debt_id: payment.debtId,
-    date: payment.date,
-    amount: Number(payment.amount),
-    note: payment.note || '',
-  }),
+  // A debt payment is one real-world cash event with two effects: it pays
+  // down the debt (debt_payments row) and moves money on the balance
+  // ledger (a linked expense for "I Owe", income for "Owed to Me").
+  // Deleting the debt_payments row cascades to remove the linked one.
+  addDebtPayment: async (payment) => {
+    const debtPayment = await insertRowReturning('debt_payments', {
+      debt_id: payment.debtId,
+      date: payment.date,
+      amount: Number(payment.amount),
+      note: payment.note || '',
+    });
+    const linked = {
+      date: payment.date,
+      amount: Number(payment.amount),
+      note: payment.note || 'Debt payment',
+      debt_payment_id: debtPayment.id,
+    };
+    if (payment.debtType === 'Owed to Me') {
+      await insertRow('income', linked);
+    } else {
+      await insertRow('expenses', { ...linked, category: 'Debt Payment' });
+    }
+  },
   deleteDebtPayment: (id) => deleteRow('debt_payments', id),
 
   addTodo: (todo) => insertRow('todos', { month: todo.month, text: todo.text, done: false }),

@@ -310,7 +310,7 @@ export default function Debts() {
             isOwner={isOwner}
             currency={currency}
             formatCurrency={formatCurrency}
-            onAddPayment={(debtId, payment) => addDebtPayment({ debtId, ...payment })}
+            onAddPayment={(debtId, payment) => addDebtPayment({ debtId, debtType: debt.Type, ...payment })}
             onDelete={deleteDebt}
             onTogglePaid={toggleDebtPaid}
             onUpdate={updateDebt}

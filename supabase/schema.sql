@@ -7,6 +7,34 @@
 -- down with row level security, so each signed-in Google account only ever
 -- sees its own rows. There is no cross-account sharing.
 
+create table debts (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
+  name text not null,
+  type text not null, -- 'I Owe' / 'Owed to Me'
+  amount numeric(12,2) not null,
+  note text,
+  date date,
+  paid boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+-- Debt payments — a ledger, same reasoning as savings.
+create table debt_payments (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
+  debt_id uuid not null references debts(id) on delete cascade,
+  date date not null,
+  amount numeric(12,2) not null,
+  note text,
+  created_at timestamptz not null default now()
+);
+
+-- A debt payment is one real-world cash event with two effects: it reduces
+-- what's owed (debt_payments row above) AND moves money in/out of the
+-- tracked balance (the expense/income row below, linked via
+-- debt_payment_id). Deleting the debt payment cascades to remove its
+-- linked expense/income automatically.
 create table expenses (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
@@ -14,6 +42,7 @@ create table expenses (
   category text not null,
   amount numeric(12,2) not null,
   note text,
+  debt_payment_id uuid references debt_payments(id) on delete cascade,
   created_at timestamptz not null default now()
 );
 
@@ -25,6 +54,7 @@ create table income (
   date date not null,
   amount numeric(12,2) not null,
   note text,
+  debt_payment_id uuid references debt_payments(id) on delete cascade,
   created_at timestamptz not null default now()
 );
 
@@ -45,29 +75,6 @@ create table savings (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
   goal_id uuid not null references goals(id) on delete cascade,
-  date date not null,
-  amount numeric(12,2) not null,
-  note text,
-  created_at timestamptz not null default now()
-);
-
-create table debts (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
-  name text not null,
-  type text not null, -- 'I Owe' / 'Owed to Me'
-  amount numeric(12,2) not null,
-  note text,
-  date date,
-  paid boolean not null default false,
-  created_at timestamptz not null default now()
-);
-
--- Debt payments — a ledger, same reasoning as savings.
-create table debt_payments (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
-  debt_id uuid not null references debts(id) on delete cascade,
   date date not null,
   amount numeric(12,2) not null,
   note text,

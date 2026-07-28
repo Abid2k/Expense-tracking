@@ -20,6 +20,7 @@ export const CATEGORY_COLORS = {
   Shopping: '#10b981',
   Education: '#6366f1',
   Other: '#6b7280',
+  'Debt Payment': '#0ea5e9',
 };
 
 export const DEBT_TYPES = ['I Owe', 'Owed to Me'];

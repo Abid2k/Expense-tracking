@@ -15,7 +15,7 @@ function debtRemaining(debt, payments) {
   return Math.max(0, Number(debt.Amount) - paid);
 }
 
-function DebtCard({ debt, payments, isOwner, currency, formatCurrency, onAddPayment, onDelete, onTogglePaid, onUpdate }) {
+function DebtCard({ debt, payments, isOwner, currency, formatCurrency, onAddPayment, onDeletePayment, onDelete, onTogglePaid, onUpdate }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ date: todayStr(), amount: '', note: '' });
   const [saving, setSaving] = useState(false);
@@ -180,7 +180,7 @@ function DebtCard({ debt, payments, isOwner, currency, formatCurrency, onAddPaym
       {payments.length > 0 && (
         <table className="table">
           <thead>
-            <tr><th>Date</th><th>Note</th><th>Amount</th></tr>
+            <tr><th>Date</th><th>Note</th><th>Amount</th><th></th></tr>
           </thead>
           <tbody>
             {[...payments].sort((a, b) => (a.Date < b.Date ? 1 : -1)).map((p) => (
@@ -188,6 +188,11 @@ function DebtCard({ debt, payments, isOwner, currency, formatCurrency, onAddPaym
                 <td data-label="Date">{toDateStr(p.Date)}</td>
                 <td data-label="Note">{p.Note}</td>
                 <td data-label="Amount">{formatCurrency(p.Amount)}</td>
+                <td data-label="">
+                  {isOwner && (
+                    <button className="danger small" onClick={() => onDeletePayment(p.ID)}>Delete</button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -198,7 +203,7 @@ function DebtCard({ debt, payments, isOwner, currency, formatCurrency, onAddPaym
 }
 
 export default function Debts() {
-  const { debts, debtPayments, addDebt, updateDebt, deleteDebt, addDebtPayment, toggleDebtPaid, isOwner, loading, configured } = useData();
+  const { debts, debtPayments, addDebt, updateDebt, deleteDebt, addDebtPayment, deleteDebtPayment, toggleDebtPaid, isOwner, loading, configured } = useData();
   const currency = useCurrency();
   const formatCurrency = useCurrencyFormat();
   const [form, setForm] = useState({ name: '', type: DEBT_TYPES[0], amount: '', note: '', date: todayStr() });
@@ -311,6 +316,7 @@ export default function Debts() {
             currency={currency}
             formatCurrency={formatCurrency}
             onAddPayment={(debtId, payment) => addDebtPayment({ debtId, debtType: debt.Type, ...payment })}
+            onDeletePayment={deleteDebtPayment}
             onDelete={deleteDebt}
             onTogglePaid={toggleDebtPaid}
             onUpdate={updateDebt}

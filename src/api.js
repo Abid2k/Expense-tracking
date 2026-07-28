@@ -86,13 +86,18 @@ export const api = {
       amount: Number(saving.amount),
       note: saving.note || '',
     });
-    await insertRow('expenses', {
-      date: saving.date,
-      amount: Number(saving.amount),
-      note: saving.note || 'Savings contribution',
-      category: 'Savings Contribution',
-      saving_id: row.id,
-    });
+    try {
+      await insertRow('expenses', {
+        date: saving.date,
+        amount: Number(saving.amount),
+        note: saving.note || 'Savings contribution',
+        category: 'Savings Contribution',
+        saving_id: row.id,
+      });
+    } catch (err) {
+      await deleteRow('savings', row.id);
+      throw err;
+    }
   },
   deleteSaving: (id) => deleteRow('savings', id),
 
@@ -130,10 +135,15 @@ export const api = {
       note: payment.note || 'Debt payment',
       debt_payment_id: debtPayment.id,
     };
-    if (payment.debtType === 'Owed to Me') {
-      await insertRow('income', linked);
-    } else {
-      await insertRow('expenses', { ...linked, category: 'Debt Payment' });
+    try {
+      if (payment.debtType === 'Owed to Me') {
+        await insertRow('income', linked);
+      } else {
+        await insertRow('expenses', { ...linked, category: 'Debt Payment' });
+      }
+    } catch (err) {
+      await deleteRow('debt_payments', debtPayment.id);
+      throw err;
     }
   },
   deleteDebtPayment: (id) => deleteRow('debt_payments', id),

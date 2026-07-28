@@ -28,8 +28,14 @@ export default function Expenses() {
   // ones in the currently-viewed month.
   const ledger = useMemo(() => {
     const all = [
-      ...income.map((i) => ({ kind: 'income', ID: i.ID, Date: i.Date, Label: i.Note || 'Salary', Amount: Number(i.Amount) })),
-      ...expenses.map((e) => ({ kind: 'expense', ID: e.ID, Date: e.Date, Label: e.Category, Note: e.Note, Amount: -Number(e.Amount) })),
+      ...income.map((i) => ({
+        kind: 'income', ID: i.ID, Date: i.Date, Label: i.Note || 'Salary', Amount: Number(i.Amount),
+        linkedPage: i.DebtPaymentID ? 'Debts' : null,
+      })),
+      ...expenses.map((e) => ({
+        kind: 'expense', ID: e.ID, Date: e.Date, Label: e.Category, Note: e.Note, Amount: -Number(e.Amount),
+        linkedPage: e.SavingID ? 'Savings' : e.DebtPaymentID ? 'Debts' : null,
+      })),
     ].sort((a, b) => (a.Date < b.Date ? -1 : a.Date > b.Date ? 1 : 0));
 
     let balance = 0;
@@ -248,12 +254,16 @@ export default function Expenses() {
                   </td>
                   <td data-label="Balance">{formatCurrency(t.balance)}</td>
                   <td data-label="">
-                    <button
-                      className="danger small"
-                      onClick={() => (t.kind === 'income' ? deleteIncome(t.ID) : handleDelete(t.ID))}
-                    >
-                      Delete
-                    </button>
+                    {t.linkedPage ? (
+                      <span className="muted" style={{ fontSize: 12 }}>Manage on {t.linkedPage}</span>
+                    ) : (
+                      <button
+                        className="danger small"
+                        onClick={() => (t.kind === 'income' ? deleteIncome(t.ID) : handleDelete(t.ID))}
+                      >
+                        Delete
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

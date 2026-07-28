@@ -5,7 +5,7 @@ import { useCurrencyFormat } from '../hooks/useCurrencyFormat';
 import { GOAL_TYPES } from '../constants';
 import { toDateStr, todayStr, monthsUntil } from '../utils/format';
 
-function GoalCard({ goal, contributions, isOwner, currency, formatCurrency, onAddContribution, onDelete, onUpdate }) {
+function GoalCard({ goal, contributions, isOwner, currency, formatCurrency, onAddContribution, onDeleteContribution, onDelete, onUpdate }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ date: todayStr(), amount: '', note: '' });
   const [saving, setSaving] = useState(false);
@@ -178,7 +178,7 @@ function GoalCard({ goal, contributions, isOwner, currency, formatCurrency, onAd
       {contributions.length > 0 && (
         <table className="table">
           <thead>
-            <tr><th>Date</th><th>Note</th><th>Amount</th></tr>
+            <tr><th>Date</th><th>Note</th><th>Amount</th><th></th></tr>
           </thead>
           <tbody>
             {[...contributions].sort((a, b) => (a.Date < b.Date ? 1 : -1)).map((c) => (
@@ -186,6 +186,11 @@ function GoalCard({ goal, contributions, isOwner, currency, formatCurrency, onAd
                 <td data-label="Date">{toDateStr(c.Date)}</td>
                 <td data-label="Note">{c.Note}</td>
                 <td data-label="Amount">{formatCurrency(c.Amount)}</td>
+                <td data-label="">
+                  {isOwner && (
+                    <button className="danger small" onClick={() => onDeleteContribution(c.ID)}>Delete</button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -196,7 +201,7 @@ function GoalCard({ goal, contributions, isOwner, currency, formatCurrency, onAd
 }
 
 export default function Savings() {
-  const { goals, savings, addGoal, updateGoal, deleteGoal, addSaving, isOwner, loading, configured } = useData();
+  const { goals, savings, addGoal, updateGoal, deleteGoal, addSaving, deleteSaving, isOwner, loading, configured } = useData();
   const currency = useCurrency();
   const formatCurrency = useCurrencyFormat();
   const [form, setForm] = useState({ name: '', type: GOAL_TYPES[0], targetAmount: '', targetDate: '', note: '' });
@@ -311,6 +316,7 @@ export default function Savings() {
             currency={currency}
             formatCurrency={formatCurrency}
             onAddContribution={(goalId, contribution) => addSaving({ goalId, ...contribution })}
+            onDeleteContribution={deleteSaving}
             onDelete={deleteGoal}
             onUpdate={updateGoal}
           />

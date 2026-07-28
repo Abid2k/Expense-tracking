@@ -7,8 +7,8 @@ const DataContext = createContext(null);
 // Supabase rows are snake_case; every page component reads the PascalCase
 // shape the old Google Sheets API used to return, so map here once instead
 // of touching every page.
-const mapIncome = (r) => ({ ID: r.id, Date: r.date, Amount: r.amount, Note: r.note });
-const mapExpense = (r) => ({ ID: r.id, Date: r.date, Category: r.category, Amount: r.amount, Note: r.note });
+const mapIncome = (r) => ({ ID: r.id, Date: r.date, Amount: r.amount, Note: r.note, DebtPaymentID: r.debt_payment_id });
+const mapExpense = (r) => ({ ID: r.id, Date: r.date, Category: r.category, Amount: r.amount, Note: r.note, DebtPaymentID: r.debt_payment_id, SavingID: r.saving_id });
 const mapGoal = (r) => ({ ID: r.id, Name: r.name, Type: r.type, TargetAmount: r.target_amount, TargetDate: r.target_date, Note: r.note });
 const mapSaving = (r) => ({ ID: r.id, GoalID: r.goal_id, Date: r.date, Amount: r.amount, Note: r.note });
 const mapDebt = (r) => ({ ID: r.id, Name: r.name, Type: r.type, Amount: r.amount, Note: r.note, Date: r.date, Paid: r.paid });

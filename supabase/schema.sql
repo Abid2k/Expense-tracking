@@ -30,34 +30,6 @@ create table debt_payments (
   created_at timestamptz not null default now()
 );
 
--- A debt payment is one real-world cash event with two effects: it reduces
--- what's owed (debt_payments row above) AND moves money in/out of the
--- tracked balance (the expense/income row below, linked via
--- debt_payment_id). Deleting the debt payment cascades to remove its
--- linked expense/income automatically.
-create table expenses (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
-  date date not null,
-  category text not null,
-  amount numeric(12,2) not null,
-  note text,
-  debt_payment_id uuid references debt_payments(id) on delete cascade,
-  created_at timestamptz not null default now()
-);
-
--- Salary / income credits — a ledger, same reasoning as savings/debt_payments,
--- so each credit's date and amount survive individually.
-create table income (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
-  date date not null,
-  amount numeric(12,2) not null,
-  note text,
-  debt_payment_id uuid references debt_payments(id) on delete cascade,
-  created_at timestamptz not null default now()
-);
-
 create table goals (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
@@ -78,6 +50,35 @@ create table savings (
   date date not null,
   amount numeric(12,2) not null,
   note text,
+  created_at timestamptz not null default now()
+);
+
+-- A debt payment (or savings contribution) is one real-world cash event
+-- with two effects: it reduces what's owed / grows a goal (debt_payments
+-- or savings row above) AND moves money in/out of the tracked balance (the
+-- expense/income row below, linked via debt_payment_id / saving_id).
+-- Deleting the linking row cascades to remove the paired expense/income.
+create table expenses (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
+  date date not null,
+  category text not null,
+  amount numeric(12,2) not null,
+  note text,
+  debt_payment_id uuid references debt_payments(id) on delete cascade,
+  saving_id uuid references savings(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+-- Salary / income credits — a ledger, same reasoning as savings/debt_payments,
+-- so each credit's date and amount survive individually.
+create table income (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
+  date date not null,
+  amount numeric(12,2) not null,
+  note text,
+  debt_payment_id uuid references debt_payments(id) on delete cascade,
   created_at timestamptz not null default now()
 );
 

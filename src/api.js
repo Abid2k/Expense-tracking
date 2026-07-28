@@ -75,12 +75,25 @@ export const api = {
   }),
   deleteGoal: (id) => deleteRow('goals', id), // savings cascade via FK
 
-  addSaving: (saving) => insertRow('savings', {
-    goal_id: saving.goalId,
-    date: saving.date,
-    amount: Number(saving.amount),
-    note: saving.note || '',
-  }),
+  // A savings contribution is money leaving your spendable balance, same
+  // reasoning as debt payments below: it creates a linked expense so it
+  // shows up in the balance ledger too. Deleting the savings row cascades
+  // to remove the linked expense.
+  addSaving: async (saving) => {
+    const row = await insertRowReturning('savings', {
+      goal_id: saving.goalId,
+      date: saving.date,
+      amount: Number(saving.amount),
+      note: saving.note || '',
+    });
+    await insertRow('expenses', {
+      date: saving.date,
+      amount: Number(saving.amount),
+      note: saving.note || 'Savings contribution',
+      category: 'Savings Contribution',
+      saving_id: row.id,
+    });
+  },
   deleteSaving: (id) => deleteRow('savings', id),
 
   addDebt: (debt) => insertRow('debts', {

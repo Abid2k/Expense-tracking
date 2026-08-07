@@ -1,4 +1,5 @@
 import { supabase } from './lib/supabaseClient';
+import { todayStr } from './utils/format';
 
 async function selectAll(table) {
   const { data, error } = await supabase.from(table).select('*').order('created_at', { ascending: true });
@@ -117,26 +118,17 @@ export const api = {
     date: debt.date,
   }),
   deleteDebt: (id) => deleteRow('debts', id), // debt_payments cascade via FK
-  toggleDebtPaid: (id, paid) => updateRow('debts', id, { paid: Boolean(paid) }),
   // A debt payment is one real-world cash event with two effects: it pays
   // down the debt (debt_payments row) and moves money on the balance
   // ledger (a linked expense for "I Owe", income for "Owed to Me").
   // Deleting the debt_payments row cascades to remove the linked one.
-  addDebtPayment: async (payment) => {
+  async addLinkedDebtPayment({ debtId, debtType, date, amount, note }) {
     const debtPayment = await insertRowReturning('debt_payments', {
-      debt_id: payment.debtId,
-      date: payment.date,
-      amount: Number(payment.amount),
-      note: payment.note || '',
+      debt_id: debtId, date, amount, note: note || '',
     });
-    const linked = {
-      date: payment.date,
-      amount: Number(payment.amount),
-      note: payment.note || 'Debt payment',
-      debt_payment_id: debtPayment.id,
-    };
+    const linked = { date, amount, note: note || 'Debt payment', debt_payment_id: debtPayment.id };
     try {
-      if (payment.debtType === 'Owed to Me') {
+      if (debtType === 'Owed to Me') {
         await insertRow('income', linked);
       } else {
         await insertRow('expenses', { ...linked, category: 'Debt Payment' });
@@ -146,6 +138,22 @@ export const api = {
       throw err;
     }
   },
+  // Checking "Mark as Paid" closes out whatever wasn't already covered by
+  // recorded payments, so the remaining amount still hits the ledger instead
+  // of silently vanishing. The ledger write happens before the debt is
+  // flipped to paid, so a failed write leaves the debt correctly unpaid
+  // instead of paid-with-missing-money.
+  toggleDebtPaid: async (id, paid, meta = {}) => {
+    if (paid && meta.remaining > 0) {
+      await api.addLinkedDebtPayment({
+        debtId: id, debtType: meta.debtType, date: todayStr(), amount: Number(meta.remaining), note: 'Marked as paid',
+      });
+    }
+    await updateRow('debts', id, { paid: Boolean(paid) });
+  },
+  addDebtPayment: (payment) => api.addLinkedDebtPayment({
+    debtId: payment.debtId, debtType: payment.debtType, date: payment.date, amount: Number(payment.amount), note: payment.note,
+  }),
   deleteDebtPayment: (id) => deleteRow('debt_payments', id),
 
   addTodo: (todo) => insertRow('todos', { month: todo.month, text: todo.text, done: false }),

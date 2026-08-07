@@ -19,6 +19,8 @@ function DebtCard({ debt, payments, isOwner, currency, formatCurrency, onAddPaym
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ date: todayStr(), amount: '', note: '' });
   const [saving, setSaving] = useState(false);
+  const [togglingPaid, setTogglingPaid] = useState(false);
+  const [toggleError, setToggleError] = useState('');
   const [error, setError] = useState('');
 
   const [editing, setEditing] = useState(false);
@@ -32,6 +34,18 @@ function DebtCard({ debt, payments, isOwner, currency, formatCurrency, onAddPaym
   const remaining = Math.max(0, amount - paidAmount);
   const pct = paidFlag ? 100 : amount > 0 ? Math.min(100, (paidAmount / amount) * 100) : 0;
   const isOwed = debt.Type === 'Owed to Me';
+
+  async function handleTogglePaid(checked) {
+    setToggleError('');
+    setTogglingPaid(true);
+    try {
+      await onTogglePaid(debt.ID, checked, { debtType: debt.Type, remaining });
+    } catch (err) {
+      setToggleError(err.message);
+    } finally {
+      setTogglingPaid(false);
+    }
+  }
 
   function startEdit() {
     setEditForm({ name: debt.Name, type: debt.Type, amount: debt.Amount, note: debt.Note || '', date: toDateStr(debt.Date) });
@@ -143,11 +157,13 @@ function DebtCard({ debt, payments, isOwner, currency, formatCurrency, onAddPaym
           <input
             type="checkbox"
             checked={paidFlag}
-            onChange={(e) => onTogglePaid(debt.ID, e.target.checked)}
+            disabled={togglingPaid}
+            onChange={(e) => handleTogglePaid(e.target.checked)}
           />
           <span className="item-text">Mark as Paid</span>
         </label>
       )}
+      {toggleError && <p className="error-text">{toggleError}</p>}
 
       {isOwner && !paidFlag && (
         <div>

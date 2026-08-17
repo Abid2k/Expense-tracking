@@ -19,10 +19,24 @@
 }
 
 .navbar-brand {
-  font-weight: 700;
-  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 19px;
   color: var(--text-h);
   white-space: nowrap;
+}
+
+.navbar-brand::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  flex-shrink: 0;
 }
 
 .navbar-controls {
@@ -96,7 +110,7 @@
 }
 
 .nav-link:hover {
-  background: rgba(59, 130, 246, 0.1);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
   transform: translateY(-1px);
 }
 
@@ -187,12 +201,12 @@
 .card {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 2px rgba(23, 34, 24, 0.05);
   transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
   max-width: 100%;
   overflow-x: auto;
@@ -200,7 +214,7 @@
 
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 24px rgba(23, 34, 24, 0.1);
 }
 
 .summary-grid {
@@ -257,18 +271,24 @@
 }
 
 .category-breakdown-amount {
+  font-family: var(--font-mono);
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .summary-label {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text);
   opacity: 0.75;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .summary-value {
-  font-size: 26px;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 25px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
   color: var(--text-h);
 }
 
@@ -332,7 +352,7 @@ button {
   border-radius: 8px;
   border: none;
   background: var(--accent);
-  color: white;
+  color: var(--bg);
   font-weight: 600;
   transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
   align-self: flex-start;
@@ -340,7 +360,7 @@ button {
 
 button:hover:not(:disabled) {
   background: var(--accent-hover);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 button:active:not(:disabled) {
@@ -382,7 +402,9 @@ button.small {
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
 }
 
 .table th, .table td {
@@ -392,9 +414,11 @@ button.small {
 }
 
 .table th {
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
   opacity: 0.6;
+  font-weight: 600;
 }
 
 @media (max-width: 640px) {
@@ -451,7 +475,7 @@ button.small {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #10b981);
+  background: linear-gradient(90deg, var(--accent), var(--gold));
   border-radius: 999px;
   transition: width 0.3s ease;
 }
@@ -518,7 +542,7 @@ ol {
 }
 
 .theme-toggle:hover {
-  background: rgba(59, 130, 246, 0.1);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
   transform: rotate(15deg);
 }
 
@@ -527,11 +551,70 @@ ol {
 }
 
 .role-badge {
+  font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(59, 130, 246, 0.15);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+
+/* The stamp: a postmark-style badge used for status/category marks
+   throughout the app instead of icons — the app's recurring signature. */
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1.5px dashed currentColor;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  transform: rotate(-4deg);
+  white-space: nowrap;
+}
+
+.stamp-gold {
+  color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+}
+
+.stamp-danger {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+}
+
+.stamp-ink {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.stamp-inline {
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* Month pickers get the same dashed-stamp treatment as the dashboard's
+   month select, so the passbook motif carries across every page. */
+input[type='month'] {
+  width: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1.5px dashed var(--accent);
+  background-color: color-mix(in srgb, var(--accent) 10%, transparent);
   color: var(--accent);
 }
 
@@ -630,4 +713,108 @@ ol {
 .habit-dot.done {
   background: var(--accent);
   border-color: var(--accent);
+}
+
+/* Dashboard: passbook spread — a narrow account "stub" beside the wide
+   ledger page, echoing a physical bank passbook layout. */
+.passbook {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  align-items: start;
+  gap: 20px;
+}
+
+@media (max-width: 860px) {
+  .passbook {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stub {
+  position: sticky;
+  top: 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 18px;
+}
+
+@media (max-width: 860px) {
+  .stub {
+    position: static;
+  }
+}
+
+.stub-month {
+  align-self: flex-start;
+  margin-bottom: 10px;
+}
+
+.stub-month select {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  width: auto;
+  padding: 3px 24px 3px 10px;
+  border-radius: 999px;
+  border: 1.5px dashed var(--accent);
+  background-color: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 12px top 55%, right 8px top 55%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.stub-balance-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+}
+
+.stub-balance {
+  font-family: var(--font-mono);
+  font-size: 34px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-h);
+  line-height: 1.2;
+  margin-bottom: 14px;
+}
+
+.stub-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+
+.stub-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.stub-stat-value {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-h);
+}
+
+.ledger-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
 }

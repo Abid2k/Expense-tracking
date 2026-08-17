@@ -4,6 +4,7 @@ import { useCurrency } from '../hooks/useCurrency';
 import { useCurrencyFormat } from '../hooks/useCurrencyFormat';
 import { GOAL_TYPES } from '../constants';
 import { toDateStr, todayStr, monthsUntil } from '../utils/format';
+import Stamp from '../components/Stamp';
 
 function GoalCard({ goal, contributions, isOwner, currency, formatCurrency, onAddContribution, onDeleteContribution, onDelete, onUpdate }) {
   const [showForm, setShowForm] = useState(false);
@@ -116,7 +117,7 @@ function GoalCard({ goal, contributions, isOwner, currency, formatCurrency, onAd
     <div className="card">
       <div className="page-header">
         <h2 style={{ margin: 0 }}>
-          {goal.Name} <span className="role-badge">{goal.Type}</span>
+          {goal.Name} <Stamp tone="gold" className="stamp-inline">{goal.Type}</Stamp>
         </h2>
         {isOwner && (
           <div className="button-row">

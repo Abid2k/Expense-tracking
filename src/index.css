@@ -1,18 +1,21 @@
 :root {
-  --text: #374151;
-  --text-h: #08060d;
-  --bg: #f5f6f8;
-  --card-bg: #ffffff;
-  --border: #e5e4e7;
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
-  --danger: #ef4444;
-  --success: #16a34a;
-  --error: #dc2626;
+  --text: #3e4a37;
+  --text-h: #172218;
+  --bg: #efead8;
+  --card-bg: #fbf8ec;
+  --border: #d9d2b8;
+  --accent: #0f6b5c;
+  --accent-hover: #0c5347;
+  --gold: #a9812e;
+  --danger: #b3432b;
+  --success: #157a5b;
+  --error: #b3432b;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
-  font: 16px/145% var(--sans);
+  font: 16px/145% var(--font-sans);
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
@@ -24,11 +27,17 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #d1d5db;
-    --text-h: #f3f4f6;
-    --bg: #14151a;
-    --card-bg: #1e2028;
-    --border: #2e303a;
+    --text: #c9d6c2;
+    --text-h: #efead8;
+    --bg: #12201a;
+    --card-bg: #182922;
+    --border: #26392e;
+    --accent: #2ba893;
+    --accent-hover: #3fc2ac;
+    --gold: #c9a24b;
+    --danger: #d2603f;
+    --success: #5fa876;
+    --error: #d2603f;
   }
 }
 
@@ -36,19 +45,31 @@
    prefers-color-scheme media query above regardless of system setting,
    because an attribute selector on :root is more specific than a plain :root. */
 :root[data-theme='dark'] {
-  --text: #d1d5db;
-  --text-h: #f3f4f6;
-  --bg: #14151a;
-  --card-bg: #1e2028;
-  --border: #2e303a;
+  --text: #c9d6c2;
+  --text-h: #efead8;
+  --bg: #12201a;
+  --card-bg: #182922;
+  --border: #26392e;
+  --accent: #2ba893;
+  --accent-hover: #3fc2ac;
+  --gold: #c9a24b;
+  --danger: #d2603f;
+  --success: #5fa876;
+  --error: #d2603f;
 }
 
 :root[data-theme='light'] {
-  --text: #374151;
-  --text-h: #08060d;
-  --bg: #f5f6f8;
-  --card-bg: #ffffff;
-  --border: #e5e4e7;
+  --text: #3e4a37;
+  --text-h: #172218;
+  --bg: #efead8;
+  --card-bg: #fbf8ec;
+  --border: #d9d2b8;
+  --accent: #0f6b5c;
+  --accent-hover: #0c5347;
+  --gold: #a9812e;
+  --danger: #b3432b;
+  --success: #157a5b;
+  --error: #b3432b;
 }
 
 * {
@@ -66,19 +87,20 @@ body {
   flex-direction: column;
 }
 
-h1, h2 {
-  font-family: var(--sans);
+h1, h2, h3 {
+  font-family: var(--font-display);
   font-weight: 600;
   color: var(--text-h);
+  letter-spacing: -0.01em;
 }
 
 h1 {
-  font-size: 28px;
+  font-size: 30px;
   margin: 0;
 }
 
 h2 {
-  font-size: 18px;
+  font-size: 19px;
   margin: 0 0 16px;
 }
 
@@ -86,8 +108,17 @@ p {
   margin: 0;
 }
 
+a {
+  color: var(--accent);
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
 code {
-  font-family: ui-monospace, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 14px;
   padding: 2px 6px;
   border-radius: 4px;

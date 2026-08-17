@@ -79,7 +79,7 @@ export default function Reports() {
               <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={isMobile ? 'preserveStartEnd' : 0} />
               <YAxis tick={{ fontSize: 11 }} width={44} />
               <Tooltip formatter={(value) => formatCurrency(value)} />
-              <Bar dataKey="total" fill="#3b82f6" name="Total Spent" />
+              <Bar dataKey="total" fill="#0f6b5c" name="Total Spent" />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -135,8 +135,8 @@ export default function Reports() {
                 <YAxis tick={{ fontSize: 11 }} width={44} />
                 <Tooltip formatter={(value) => formatCurrency(value)} />
                 <Legend wrapperStyle={{ fontSize: 13 }} />
-                <Bar dataKey={monthLabel(monthA)} fill="#94a3b8" />
-                <Bar dataKey={monthLabel(monthB)} fill="#3b82f6" />
+                <Bar dataKey={monthLabel(monthA)} fill="#a9812e" />
+                <Bar dataKey={monthLabel(monthB)} fill="#0f6b5c" />
               </BarChart>
             </ResponsiveContainer>
 

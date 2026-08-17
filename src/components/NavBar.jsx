@@ -40,7 +40,7 @@ export default function NavBar() {
   return (
     <nav className="navbar">
       <div className="navbar-top">
-        <div className="navbar-brand">💰 Expense Tracker</div>
+        <div className="navbar-brand">Expense Ledger</div>
         <div className="navbar-controls">
           <button className="theme-toggle" onClick={toggle} title="Toggle light/dark mode" aria-label="Toggle light/dark mode">
             {isDark ? '☀️' : '🌙'}

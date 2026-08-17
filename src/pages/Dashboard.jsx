@@ -15,7 +15,7 @@ function isDebtPaid(debt) {
 }
 
 export default function Dashboard() {
-  const { expenses, savings, goals, debts, debtPayments, todos, loading, configured, error } = useData();
+  const { expenses, income, savings, goals, debts, debtPayments, todos, loading, configured, error } = useData();
   const [monthKey, setMonthKey] = useState(currentMonthKey());
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -112,6 +112,14 @@ export default function Dashboard() {
   const todosDone = monthTodos.filter((t) => t.Done === true || t.Done === 'TRUE').length;
   const pendingTodos = monthTodos.filter((t) => !(t.Done === true || t.Done === 'TRUE'));
 
+  // Balance carried forward — all-time income minus all-time expenses,
+  // the passbook's running total, independent of the month being viewed.
+  const currentBalance = useMemo(() => {
+    const incomeTotal = income.reduce((sum, i) => sum + Number(i.Amount), 0);
+    const expenseTotal = expenses.reduce((sum, e) => sum + Number(e.Amount), 0);
+    return incomeTotal - expenseTotal;
+  }, [income, expenses]);
+
   if (!configured) {
     return (
       <div className="page">
@@ -126,76 +134,79 @@ export default function Dashboard() {
 
   return (
     <div className="page">
-      <div className="page-header">
-        <h1>Dashboard</h1>
-        <select
-          value={monthKey}
-          onChange={(e) => {
-            setMonthKey(e.target.value);
-            setSelectedCategory(null);
-          }}
-        >
-          {months.map((m) => (
-            <option key={m} value={m}>{monthLabel(m)}</option>
-          ))}
-        </select>
-      </div>
+      <h1>Dashboard</h1>
 
       {error && <p className="error-text">{error}</p>}
       {loading && <p className="muted loading-pulse">Loading…</p>}
 
-      <div className="summary-grid">
-        <div className="card summary-card">
-          <span className="summary-label">Total Spent — {monthLabel(monthKey)}</span>
-          <span className="summary-value">{formatCurrency(total)}</span>
-        </div>
-        <div className="card summary-card">
-          <span className="summary-label">Top Category</span>
-          <span className="summary-value">{topCategory ? topCategory.name : '—'}</span>
-          <span className="muted">{topCategory ? formatCurrency(topCategory.value) : ''}</span>
-        </div>
-        <div className="card summary-card">
-          <span className="summary-label">Savings Progress</span>
-          <span className="summary-value">{savingsPct.toFixed(0)}%</span>
-          <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `${savingsPct}%` }} />
+      <div className="passbook">
+        <aside className="stub">
+          <div className="stub-month">
+            <select
+              value={monthKey}
+              onChange={(e) => {
+                setMonthKey(e.target.value);
+                setSelectedCategory(null);
+              }}
+            >
+              {months.map((m) => (
+                <option key={m} value={m}>{monthLabel(m)}</option>
+              ))}
+            </select>
           </div>
-        </div>
-        <div className="card summary-card">
-          <span className="summary-label">Debt Outstanding</span>
-          <span className="summary-value error-text">{formatCurrency(debtOutstanding)}</span>
-        </div>
-      </div>
 
-      {isCurrentMonth && (
-        <div className="summary-grid">
-          <div className="card summary-card">
-            <span className="summary-label">Average Daily Spend</span>
-            <span className="summary-value">{formatCurrency(avgDaily)}</span>
-          </div>
-          <div className="card summary-card">
-            <span className="summary-label">Projected Month Total</span>
-            <span className="summary-value">{formatCurrency(projected)}</span>
-          </div>
-          <div className="card summary-card">
-            <span className="summary-label">Days Left This Month</span>
-            <span className="summary-value">{daysRemaining}</span>
-          </div>
-        </div>
-      )}
+          <span className="stub-balance-label">Balance carried forward</span>
+          <span className="stub-balance">{formatCurrency(currentBalance)}</span>
 
+          <div className="stub-stats">
+            <div className="stub-stat">
+              <span className="muted">Spent — {monthLabel(monthKey)}</span>
+              <span className="stub-stat-value">{formatCurrency(total)}</span>
+            </div>
+            <div className="stub-stat">
+              <span className="muted">Top category</span>
+              <span className="stub-stat-value">{topCategory ? topCategory.name : '—'}</span>
+            </div>
+            <div className="stub-stat">
+              <span className="muted">Savings progress</span>
+              <span className="stub-stat-value">{savingsPct.toFixed(0)}%</span>
+            </div>
+            <div className="stub-stat">
+              <span className="muted">Debt outstanding</span>
+              <span className="stub-stat-value" style={{ color: 'var(--danger)' }}>{formatCurrency(debtOutstanding)}</span>
+            </div>
+            {isCurrentMonth && (
+              <>
+                <div className="stub-stat">
+                  <span className="muted">Avg. daily spend</span>
+                  <span className="stub-stat-value">{formatCurrency(avgDaily)}</span>
+                </div>
+                <div className="stub-stat">
+                  <span className="muted">Projected total</span>
+                  <span className="stub-stat-value">{formatCurrency(projected)}</span>
+                </div>
+                <div className="stub-stat">
+                  <span className="muted">Days left</span>
+                  <span className="stub-stat-value">{daysRemaining}</span>
+                </div>
+              </>
+            )}
+          </div>
+        </aside>
+
+        <div className="ledger-page">
       <div className="card">
         <h2>Spending Trend — {monthLabel(monthKey)}</h2>
         {total === 0 ? (
           <p className="muted">No expenses recorded for {monthLabel(monthKey)}.</p>
         ) : (
           <ResponsiveContainer width="100%" height={isMobile ? 220 : 260}>
-            <AreaChart data={dailyTrend} margin={{ left: -20, right: 8 }}>
+            <AreaChart data={dailyTrend} margin={{ left: 0, right: 8 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="day" tick={{ fontSize: 11 }} interval={isMobile ? 4 : 1} />
-              <YAxis tick={{ fontSize: 11 }} width={44} />
+              <YAxis tick={{ fontSize: 11 }} width={56} />
               <Tooltip formatter={(value) => formatCurrency(value)} labelFormatter={(day) => `Day ${day}`} />
-              <Area type="monotone" dataKey="total" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.25} name="Spent" />
+              <Area type="monotone" dataKey="total" stroke="#0f6b5c" fill="#0f6b5c" fillOpacity={0.3} name="Spent" />
             </AreaChart>
           </ResponsiveContainer>
         )}
@@ -347,6 +358,8 @@ export default function Dashboard() {
               <span className="item-text">{t.Text}</span>
             </div>
           ))}
+        </div>
+      </div>
         </div>
       </div>
     </div>

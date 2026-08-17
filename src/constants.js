@@ -11,17 +11,17 @@ export const CATEGORIES = [
 ];
 
 export const CATEGORY_COLORS = {
-  Food: '#f59e0b',
-  Transport: '#3b82f6',
-  Housing: '#8b5cf6',
-  Utilities: '#06b6d4',
-  Health: '#ef4444',
-  Entertainment: '#ec4899',
-  Shopping: '#10b981',
-  Education: '#6366f1',
-  Other: '#6b7280',
-  'Debt Payment': '#0ea5e9',
-  'Savings Contribution': '#14b8a6',
+  Food: '#c97b3d',
+  Transport: '#3b6e8f',
+  Housing: '#6b4e9c',
+  Utilities: '#2a8c8c',
+  Health: '#b3432b',
+  Entertainment: '#b0568a',
+  Shopping: '#157a5b',
+  Education: '#4a5fa5',
+  Other: '#7a7267',
+  'Debt Payment': '#0f6b5c',
+  'Savings Contribution': '#a9812e',
 };
 
 export const DEBT_TYPES = ['I Owe', 'Owed to Me'];

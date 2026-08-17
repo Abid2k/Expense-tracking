@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { toDateStr, todayStr } from '../utils/format';
+import Stamp from '../components/Stamp';
 
 export default function Notes() {
   const { notes, addNote, deleteNote, isOwner, loading, configured } = useData();
@@ -80,7 +81,7 @@ export default function Notes() {
                 <button className="danger small" onClick={() => deleteNote(n.ID)}>Delete</button>
               )}
             </div>
-            <p className="muted">{toDateStr(n.Date)}</p>
+            <Stamp tone="ink">{toDateStr(n.Date)}</Stamp>
             <p style={{ whiteSpace: 'pre-wrap' }}>{n.Content}</p>
           </div>
         ))

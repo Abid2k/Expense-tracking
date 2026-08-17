@@ -4,6 +4,7 @@ import { useCurrency } from '../hooks/useCurrency';
 import { useCurrencyFormat } from '../hooks/useCurrencyFormat';
 import { DEBT_TYPES } from '../constants';
 import { toDateStr, todayStr } from '../utils/format';
+import Stamp from '../components/Stamp';
 
 function isDebtPaid(debt) {
   return debt.Paid === true || debt.Paid === 'TRUE';
@@ -134,7 +135,7 @@ function DebtCard({ debt, payments, isOwner, currency, formatCurrency, onAddPaym
       <div className="page-header">
         <h2 style={{ margin: 0 }}>
           {debt.Name} <span className={isOwed ? 'success-text' : 'error-text'} style={{ fontSize: 13, fontWeight: 600 }}>({debt.Type})</span>
-          {paidFlag && <span className="role-badge" style={{ marginLeft: 8 }}>Paid</span>}
+          {paidFlag && <Stamp tone="gold" className="stamp-inline">Paid</Stamp>}
         </h2>
         {isOwner && (
           <div className="button-row">

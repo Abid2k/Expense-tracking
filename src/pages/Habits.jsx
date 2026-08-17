@@ -144,7 +144,7 @@ export default function Habits() {
               <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
               <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} width={40} tickFormatter={(v) => `${v}%`} />
               <Tooltip formatter={(value) => `${value}%`} />
-              <Line type="monotone" dataKey="pct" stroke="#3b82f6" strokeWidth={2} name="Days completed" dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="pct" stroke="#0f6b5c" strokeWidth={2} name="Days completed" dot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

@@ -116,7 +116,7 @@
 
 .nav-link.active {
   background: var(--accent);
-  color: white;
+  color: var(--on-accent);
 }
 
 @media (max-width: 768px) {
@@ -201,12 +201,12 @@
 .card {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 10px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: 0 1px 2px rgba(23, 34, 24, 0.05);
+  box-shadow: 0 1px 3px rgba(139, 30, 45, 0.1);
   transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
   max-width: 100%;
   overflow-x: auto;
@@ -214,7 +214,7 @@
 
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(23, 34, 24, 0.1);
+  box-shadow: 0 12px 28px rgba(139, 30, 45, 0.18);
 }
 
 .summary-grid {
@@ -352,7 +352,7 @@ button {
   border-radius: 8px;
   border: none;
   background: var(--accent);
-  color: var(--bg);
+  color: var(--on-accent);
   font-weight: 600;
   transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
   align-self: flex-start;
@@ -560,7 +560,7 @@ ol {
   color: var(--accent);
 }
 
-/* The stamp: a postmark-style badge used for status/category marks
+/* The stamp: a pressed wax-seal badge used for status/category marks
    throughout the app instead of icons — the app's recurring signature. */
 .stamp {
   display: inline-flex;
@@ -573,28 +573,26 @@ ol {
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 999px;
-  border: 1.5px dashed currentColor;
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-  transform: rotate(-4deg);
+  border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  background: var(--seal);
+  color: var(--gold);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: rotate(-2deg);
   white-space: nowrap;
 }
 
 .stamp-gold {
-  color: var(--gold);
-  background: color-mix(in srgb, var(--gold) 12%, transparent);
+  background: var(--gold);
+  color: var(--seal);
+  border-color: color-mix(in srgb, var(--seal) 45%, transparent);
 }
 
 .stamp-danger {
-  color: var(--danger);
-  background: color-mix(in srgb, var(--danger) 12%, transparent);
-}
-
-.stamp-ink {
-  color: var(--text);
-  background: color-mix(in srgb, var(--text) 10%, transparent);
+  background: var(--danger);
+  color: #fff8f0;
+  border-color: color-mix(in srgb, var(--gold) 40%, transparent);
 }
 
 .stamp-inline {
@@ -602,8 +600,8 @@ ol {
   vertical-align: middle;
 }
 
-/* Month pickers get the same dashed-stamp treatment as the dashboard's
-   month select, so the passbook motif carries across every page. */
+/* Month pickers become solid control chips in the interactive accent —
+   visually distinct from the wax-seal status marks on data. */
 input[type='month'] {
   width: auto;
   font-family: var(--font-mono);
@@ -611,11 +609,11 @@ input[type='month'] {
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 7px 10px;
+  padding: 8px 12px;
   border-radius: 999px;
-  border: 1.5px dashed var(--accent);
-  background-color: color-mix(in srgb, var(--accent) 10%, transparent);
-  color: var(--accent);
+  border: none;
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .checklist {
@@ -738,7 +736,8 @@ input[type='month'] {
   gap: 4px;
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-top: 3px solid var(--gold);
+  border-radius: 10px;
   padding: 22px 18px;
 }
 
@@ -760,11 +759,11 @@ input[type='month'] {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   width: auto;
-  padding: 3px 24px 3px 10px;
+  padding: 5px 26px 5px 12px;
   border-radius: 999px;
-  border: 1.5px dashed var(--accent);
-  background-color: color-mix(in srgb, var(--accent) 10%, transparent);
-  color: var(--accent);
+  border: none;
+  background-color: var(--accent);
+  color: var(--on-accent);
   appearance: none;
   background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
   background-position: right 12px top 55%, right 8px top 55%;
@@ -784,7 +783,7 @@ input[type='month'] {
   font-size: 34px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--text-h);
+  color: var(--gold);
   line-height: 1.2;
   margin-bottom: 14px;
 }

@@ -206,7 +206,7 @@ export default function Dashboard() {
               <XAxis dataKey="day" tick={{ fontSize: 11 }} interval={isMobile ? 4 : 1} />
               <YAxis tick={{ fontSize: 11 }} width={56} />
               <Tooltip formatter={(value) => formatCurrency(value)} labelFormatter={(day) => `Day ${day}`} />
-              <Area type="monotone" dataKey="total" stroke="#0f6b5c" fill="#0f6b5c" fillOpacity={0.3} name="Spent" />
+              <Area type="monotone" dataKey="total" stroke="#457b9d" fill="#457b9d" fillOpacity={0.3} name="Spent" />
             </AreaChart>
           </ResponsiveContainer>
         )}

@@ -81,7 +81,7 @@ export default function Notes() {
                 <button className="danger small" onClick={() => deleteNote(n.ID)}>Delete</button>
               )}
             </div>
-            <Stamp tone="ink">{toDateStr(n.Date)}</Stamp>
+            <Stamp>{toDateStr(n.Date)}</Stamp>
             <p style={{ whiteSpace: 'pre-wrap' }}>{n.Content}</p>
           </div>
         ))

@@ -1,18 +1,20 @@
 :root {
-  --text: #3e4a37;
-  --text-h: #172218;
-  --bg: #efead8;
-  --card-bg: #fbf8ec;
-  --border: #d9d2b8;
-  --accent: #0f6b5c;
-  --accent-hover: #0c5347;
-  --gold: #a9812e;
-  --danger: #b3432b;
-  --success: #157a5b;
-  --error: #b3432b;
+  --text: #3a2226;
+  --text-h: #241014;
+  --bg: #fbf1ec;
+  --card-bg: #fffdfb;
+  --border: #e6d2c8;
+  --accent: #457b9d;
+  --accent-hover: #35617d;
+  --on-accent: #ffffff;
+  --gold: #96721a;
+  --seal: #8b1e2d;
+  --danger: #c42839;
+  --success: #96721a;
+  --error: #c42839;
 
   --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  --font-display: 'Playfair Display', ui-serif, Georgia, serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
   font: 16px/145% var(--font-sans);
@@ -27,17 +29,19 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #c9d6c2;
-    --text-h: #efead8;
-    --bg: #12201a;
-    --card-bg: #182922;
-    --border: #26392e;
-    --accent: #2ba893;
-    --accent-hover: #3fc2ac;
-    --gold: #c9a24b;
-    --danger: #d2603f;
-    --success: #5fa876;
-    --error: #d2603f;
+    --text: #e8d4ce;
+    --text-h: #f7ede8;
+    --bg: #1c0f10;
+    --card-bg: #2a1519;
+    --border: #4a2126;
+    --accent: #6fa0c2;
+    --accent-hover: #8ab6d4;
+    --on-accent: #1c0f10;
+    --gold: #f4d35e;
+    --seal: #a5273a;
+    --danger: #f0576b;
+    --success: #f4d35e;
+    --error: #f0576b;
   }
 }
 
@@ -45,31 +49,35 @@
    prefers-color-scheme media query above regardless of system setting,
    because an attribute selector on :root is more specific than a plain :root. */
 :root[data-theme='dark'] {
-  --text: #c9d6c2;
-  --text-h: #efead8;
-  --bg: #12201a;
-  --card-bg: #182922;
-  --border: #26392e;
-  --accent: #2ba893;
-  --accent-hover: #3fc2ac;
-  --gold: #c9a24b;
-  --danger: #d2603f;
-  --success: #5fa876;
-  --error: #d2603f;
+  --text: #e8d4ce;
+  --text-h: #f7ede8;
+  --bg: #1c0f10;
+  --card-bg: #2a1519;
+  --border: #4a2126;
+  --accent: #6fa0c2;
+  --accent-hover: #8ab6d4;
+  --on-accent: #1c0f10;
+  --gold: #f4d35e;
+  --seal: #a5273a;
+  --danger: #f0576b;
+  --success: #f4d35e;
+  --error: #f0576b;
 }
 
 :root[data-theme='light'] {
-  --text: #3e4a37;
-  --text-h: #172218;
-  --bg: #efead8;
-  --card-bg: #fbf8ec;
-  --border: #d9d2b8;
-  --accent: #0f6b5c;
-  --accent-hover: #0c5347;
-  --gold: #a9812e;
-  --danger: #b3432b;
-  --success: #157a5b;
-  --error: #b3432b;
+  --text: #3a2226;
+  --text-h: #241014;
+  --bg: #fbf1ec;
+  --card-bg: #fffdfb;
+  --border: #e6d2c8;
+  --accent: #457b9d;
+  --accent-hover: #35617d;
+  --on-accent: #ffffff;
+  --gold: #96721a;
+  --seal: #8b1e2d;
+  --danger: #c42839;
+  --success: #96721a;
+  --error: #c42839;
 }
 
 * {
@@ -95,12 +103,12 @@ h1, h2, h3 {
 }
 
 h1 {
-  font-size: 30px;
+  font-size: 32px;
   margin: 0;
 }
 
 h2 {
-  font-size: 19px;
+  font-size: 20px;
   margin: 0 0 16px;
 }
 
@@ -128,4 +136,12 @@ code {
 button {
   font: inherit;
   cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

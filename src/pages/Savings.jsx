@@ -117,7 +117,7 @@ function GoalCard({ goal, contributions, isOwner, currency, formatCurrency, onAd
     <div className="card">
       <div className="page-header">
         <h2 style={{ margin: 0 }}>
-          {goal.Name} <Stamp tone="gold" className="stamp-inline">{goal.Type}</Stamp>
+          {goal.Name} <Stamp className="stamp-inline">{goal.Type}</Stamp>
         </h2>
         {isOwner && (
           <div className="button-row">

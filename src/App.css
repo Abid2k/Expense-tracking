@@ -12,6 +12,9 @@
 }
 
 .navbar-top {
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -93,6 +96,9 @@
 }
 
 .navbar-links {
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
@@ -145,7 +151,7 @@
 .main-content {
   flex: 1;
   width: 100%;
-  max-width: 960px;
+  max-width: var(--content-max);
   margin: 0 auto;
   padding: 24px;
   box-sizing: border-box;
@@ -710,9 +716,9 @@ input[type='month'] {
    The only saturated block on the page — everything else is ink on bone. */
 .passbook {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 280px 1fr;
   align-items: start;
-  gap: 20px;
+  gap: 24px;
 }
 
 @media (max-width: 860px) {

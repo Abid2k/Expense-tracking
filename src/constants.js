@@ -11,17 +11,24 @@ export const CATEGORIES = [
 ];
 
 export const CATEGORY_COLORS = {
-  Food: '#c9a227',
-  Transport: '#457b9d',
-  Housing: '#8b1e2d',
-  Utilities: '#6e9bb0',
-  Health: '#e63946',
-  Entertainment: '#a8557a',
-  Shopping: '#4c7a4a',
-  Education: '#6a5a9c',
-  Other: '#7a6a63',
-  'Debt Payment': '#8b1e2d',
-  'Savings Contribution': '#d9aa1e',
+  Food: '#c8ff2e',
+  Transport: '#ff4a1c',
+  Housing: '#046d63',
+  Utilities: '#1d7ae8',
+  Health: '#8e7cff',
+  Entertainment: '#e5157f',
+  Shopping: '#ffb302',
+  Education: '#0e8c7e',
+  Other: '#a8a296',
+  'Debt Payment': '#ff4a1c',
+  'Savings Contribution': '#c8ff2e',
+};
+
+// Chart marks can't read CSS variables (recharts writes SVG presentation
+// attributes), so they live here — picked to stay legible on bone and on ink.
+export const CHART = {
+  primary: '#0e8c7e',
+  secondary: '#ffb302',
 };
 
 export const DEBT_TYPES = ['I Owe', 'Owed to Me'];

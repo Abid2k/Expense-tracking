@@ -3,6 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useData } from '../context/DataContext';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { toDateStr, todayStr, currentMonthKey, monthLabel, daysInMonth } from '../utils/format';
+import { CHART } from '../constants';
 
 export default function Habits() {
   const { habits, habitLogs, addHabit, deleteHabit, toggleHabitLog, isOwner, loading, configured } = useData();
@@ -144,7 +145,7 @@ export default function Habits() {
               <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
               <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} width={40} tickFormatter={(v) => `${v}%`} />
               <Tooltip formatter={(value) => `${value}%`} />
-              <Line type="monotone" dataKey="pct" stroke="#457b9d" strokeWidth={2} name="Days completed" dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="pct" stroke={CHART.primary} strokeWidth={2} name="Days completed" dot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

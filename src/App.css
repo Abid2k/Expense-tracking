@@ -3,7 +3,7 @@
   flex-direction: column;
   padding: calc(12px + env(safe-area-inset-top)) 24px 12px;
   background: var(--card-bg);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 3px solid var(--rule);
   gap: 10px;
   transition: background-color 0.2s ease, border-color 0.2s ease;
   position: sticky;
@@ -23,19 +23,19 @@
   align-items: center;
   gap: 8px;
   font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 19px;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.03em;
   color: var(--text-h);
   white-space: nowrap;
 }
 
 .navbar-brand::before {
   content: '';
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
+  width: 10px;
+  height: 10px;
   background: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  border: 2px solid var(--rule);
   flex-shrink: 0;
 }
 
@@ -54,8 +54,7 @@
   display: none;
   flex-direction: column;
   background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 2px solid var(--rule);
   width: 40px;
   height: 40px;
   padding: 0;
@@ -100,23 +99,26 @@
 }
 
 .nav-link {
-  padding: 10px 14px;
-  border-radius: 8px;
+  padding: 9px 12px;
   text-decoration: none;
   color: var(--text);
-  font-weight: 500;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
   display: inline-block;
 }
 
 .nav-link:hover {
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
   transform: translateY(-1px);
 }
 
 .nav-link.active {
-  background: var(--accent);
-  color: var(--on-accent);
+  background: var(--lime);
+  color: var(--ink);
 }
 
 @media (max-width: 768px) {
@@ -200,21 +202,20 @@
 
 .card {
   background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border: 2px solid var(--rule);
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: 0 1px 3px rgba(139, 30, 45, 0.1);
+  box-shadow: 4px 4px 0 var(--shadow);
   transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
   max-width: 100%;
   overflow-x: auto;
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(139, 30, 45, 0.18);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--shadow);
 }
 
 .summary-grid {
@@ -249,20 +250,19 @@
   align-items: center;
   gap: 8px;
   padding: 6px 8px;
-  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
 .category-breakdown li:hover,
 .category-breakdown li.active {
-  background: var(--border);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
 .category-breakdown .swatch {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--rule);
   flex-shrink: 0;
 }
 
@@ -277,17 +277,20 @@
 }
 
 .summary-label {
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   color: var(--text);
   opacity: 0.75;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.12em;
 }
 
 .summary-value {
-  font-family: var(--font-mono);
-  font-size: 25px;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
   font-variant-numeric: tabular-nums;
   color: var(--text-h);
 }
@@ -317,9 +320,8 @@ label {
 input, select, textarea {
   width: 100%;
   padding: 9px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg);
+  border: 2px solid var(--rule);
+  background: var(--card-bg);
   color: var(--text-h);
   font: inherit;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease, color 0.2s ease;
@@ -328,7 +330,7 @@ input, select, textarea {
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 textarea {
@@ -349,22 +351,25 @@ textarea {
 
 button {
   padding: 10px 18px;
-  border-radius: 8px;
-  border: none;
+  border: 2px solid var(--rule);
   background: var(--accent);
   color: var(--on-accent);
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 3px 3px 0 var(--shadow);
   transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
   align-self: flex-start;
 }
 
 button:hover:not(:disabled) {
   background: var(--accent-hover);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 35%, transparent);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--shadow);
 }
 
 button:active:not(:disabled) {
-  transform: scale(0.96);
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--shadow);
 }
 
 button:disabled {
@@ -373,8 +378,7 @@ button:disabled {
 }
 
 button.secondary {
-  background: transparent;
-  border: 1px solid var(--border);
+  background: var(--card-bg);
   color: var(--text-h);
 }
 
@@ -416,9 +420,10 @@ button.small {
 .table th {
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  opacity: 0.6;
-  font-weight: 600;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+  font-weight: 700;
+  border-bottom: 2px solid var(--rule);
 }
 
 @media (max-width: 640px) {
@@ -432,8 +437,7 @@ button.small {
   }
 
   .table tr {
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    border: 2px solid var(--rule);
     padding: 4px 10px;
     margin-bottom: 10px;
   }
@@ -463,9 +467,9 @@ button.small {
 
 .progress-bar {
   width: 100%;
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(128, 128, 128, 0.2);
+  height: 12px;
+  border: 2px solid var(--rule);
+  background: var(--card-bg);
   overflow: hidden;
 }
 
@@ -475,16 +479,15 @@ button.small {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--gold));
-  border-radius: 999px;
+  background: var(--lime);
   transition: width 0.3s ease;
 }
 
 .dot {
   display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid var(--rule);
   margin-right: 6px;
 }
 
@@ -529,8 +532,7 @@ ol {
 
 .theme-toggle {
   background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  border: 2px solid var(--rule);
   width: 36px;
   height: 36px;
   padding: 0;
@@ -555,13 +557,12 @@ ol {
   font-size: 12px;
   font-weight: 600;
   padding: 4px 10px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  color: var(--accent);
+  background: var(--ink);
+  color: var(--lime);
 }
 
-/* The stamp: a pressed wax-seal badge used for status/category marks
-   throughout the app instead of icons — the app's recurring signature. */
+/* The stamp: a hard ink chip used for status/category marks throughout
+   the app instead of icons — the app's recurring signature. */
 .stamp {
   display: inline-flex;
   align-items: center;
@@ -570,29 +571,24 @@ ol {
   flex-shrink: 0;
   font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
-  background: var(--seal);
-  color: var(--gold);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  transform: rotate(-2deg);
+  padding: 4px 10px;
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  color: var(--lime);
   white-space: nowrap;
 }
 
 .stamp-gold {
-  background: var(--gold);
-  color: var(--seal);
-  border-color: color-mix(in srgb, var(--seal) 45%, transparent);
+  background: var(--lime);
+  color: var(--ink);
 }
 
 .stamp-danger {
   background: var(--danger);
   color: #fff8f0;
-  border-color: color-mix(in srgb, var(--gold) 40%, transparent);
 }
 
 .stamp-inline {
@@ -610,10 +606,9 @@ input[type='month'] {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 8px 12px;
-  border-radius: 999px;
-  border: none;
-  background: var(--accent);
-  color: var(--on-accent);
+  border: 2px solid var(--rule);
+  background: var(--ink);
+  color: var(--lime);
 }
 
 .checklist {
@@ -691,8 +686,7 @@ input[type='month'] {
 .habit-dot {
   width: 20px;
   height: 20px;
-  border-radius: 50%;
-  border: 1.5px solid var(--border);
+  border: 2px solid var(--rule);
   background: transparent;
   padding: 0;
   cursor: pointer;
@@ -709,12 +703,11 @@ input[type='month'] {
 }
 
 .habit-dot.done {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--lime);
 }
 
-/* Dashboard: passbook spread — a narrow account "stub" beside the wide
-   ledger page, echoing a physical bank passbook layout. */
+/* Dashboard: a narrow petrol balance panel beside the wide ledger column.
+   The only saturated block on the page — everything else is ink on bone. */
 .passbook {
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -734,10 +727,10 @@ input[type='month'] {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-top: 3px solid var(--gold);
-  border-radius: 10px;
+  background: var(--stub-bg);
+  color: var(--stub-fg);
+  border: 2px solid var(--rule);
+  box-shadow: 4px 4px 0 var(--shadow);
   padding: 22px 18px;
 }
 
@@ -755,15 +748,14 @@ input[type='month'] {
 .stub-month select {
   font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   width: auto;
   padding: 5px 26px 5px 12px;
-  border-radius: 999px;
-  border: none;
-  background-color: var(--accent);
-  color: var(--on-accent);
+  border: 2px solid var(--ink);
+  background-color: var(--ink);
+  color: var(--lime);
   appearance: none;
   background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
   background-position: right 12px top 55%, right 8px top 55%;
@@ -772,19 +764,21 @@ input[type='month'] {
 }
 
 .stub-balance-label {
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  opacity: 0.7;
+  letter-spacing: 0.12em;
+  color: var(--lime);
 }
 
 .stub-balance {
-  font-family: var(--font-mono);
-  font-size: 34px;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
-  color: var(--gold);
-  line-height: 1.2;
+  color: var(--lime);
+  line-height: 1.1;
   margin-bottom: 14px;
 }
 
@@ -793,7 +787,7 @@ input[type='month'] {
   flex-direction: column;
   gap: 10px;
   padding-top: 14px;
-  border-top: 1px dashed var(--border);
+  border-top: 1px dashed color-mix(in srgb, var(--stub-fg) 40%, transparent);
 }
 
 .stub-stat {
@@ -808,7 +802,7 @@ input[type='month'] {
   font-family: var(--font-mono);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--text-h);
+  color: var(--stub-fg);
 }
 
 .ledger-page {

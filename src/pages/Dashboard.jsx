@@ -7,7 +7,7 @@ import {
 import { useData } from '../context/DataContext';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useCurrencyFormat } from '../hooks/useCurrencyFormat';
-import { CATEGORY_COLORS } from '../constants';
+import { CATEGORY_COLORS, CHART } from '../constants';
 import { toMonthKey, toDateStr, monthLabel, currentMonthKey, daysInMonth } from '../utils/format';
 
 function isDebtPaid(debt) {
@@ -173,7 +173,7 @@ export default function Dashboard() {
             </div>
             <div className="stub-stat">
               <span className="muted">Debt outstanding</span>
-              <span className="stub-stat-value" style={{ color: 'var(--danger)' }}>{formatCurrency(debtOutstanding)}</span>
+              <span className="stub-stat-value" style={{ color: 'var(--lime)' }}>{formatCurrency(debtOutstanding)}</span>
             </div>
             {isCurrentMonth && (
               <>
@@ -206,7 +206,7 @@ export default function Dashboard() {
               <XAxis dataKey="day" tick={{ fontSize: 11 }} interval={isMobile ? 4 : 1} />
               <YAxis tick={{ fontSize: 11 }} width={56} />
               <Tooltip formatter={(value) => formatCurrency(value)} labelFormatter={(day) => `Day ${day}`} />
-              <Area type="monotone" dataKey="total" stroke="#457b9d" fill="#457b9d" fillOpacity={0.3} name="Spent" />
+              <Area type="monotone" dataKey="total" stroke={CHART.primary} fill={CHART.primary} fillOpacity={0.25} name="Spent" />
             </AreaChart>
           </ResponsiveContainer>
         )}

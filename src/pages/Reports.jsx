@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { useData } from '../context/DataContext';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useCurrencyFormat } from '../hooks/useCurrencyFormat';
-import { CATEGORIES, CATEGORY_COLORS } from '../constants';
+import { CATEGORIES, CATEGORY_COLORS, CHART } from '../constants';
 import { toMonthKey, monthLabel, currentMonthKey, previousMonthKey } from '../utils/format';
 
 export default function Reports() {
@@ -79,7 +79,7 @@ export default function Reports() {
               <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={isMobile ? 'preserveStartEnd' : 0} />
               <YAxis tick={{ fontSize: 11 }} width={44} />
               <Tooltip formatter={(value) => formatCurrency(value)} />
-              <Bar dataKey="total" fill="#457b9d" name="Total Spent" />
+              <Bar dataKey="total" fill={CHART.primary} name="Total Spent" />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -135,8 +135,8 @@ export default function Reports() {
                 <YAxis tick={{ fontSize: 11 }} width={44} />
                 <Tooltip formatter={(value) => formatCurrency(value)} />
                 <Legend wrapperStyle={{ fontSize: 13 }} />
-                <Bar dataKey={monthLabel(monthA)} fill="#d9aa1e" />
-                <Bar dataKey={monthLabel(monthB)} fill="#457b9d" />
+                <Bar dataKey={monthLabel(monthA)} fill={CHART.secondary} />
+                <Bar dataKey={monthLabel(monthB)} fill={CHART.primary} />
               </BarChart>
             </ResponsiveContainer>
 
